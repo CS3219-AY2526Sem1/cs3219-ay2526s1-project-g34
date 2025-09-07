@@ -2,6 +2,8 @@
 const {
   Model
 } = require('sequelize');
+const bcrypt = require('bcrypt');
+
 module.exports = (sequelize, DataTypes) => {
   class User extends Model {
     /**
@@ -21,7 +23,7 @@ module.exports = (sequelize, DataTypes) => {
   {
     id: {
       type: DataTypes.INTEGER,
-      defaultValue: DataTypes.INTEGER,
+      autoIncrement: true,
       primaryKey: true
     },
     username: {
@@ -45,6 +47,7 @@ module.exports = (sequelize, DataTypes) => {
     modelName: 'User',
     hooks: {
       beforeCreate: async (user) => {
+        console.log('here')
         user.password = await bcrypt.hash(user.password, 12);
       },
       beforeUpdate: async (user) => {

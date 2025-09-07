@@ -1,4 +1,4 @@
-import express from 'express';
+const express = require('express');
 
 const helloRoutes = express.Router();
 
@@ -14,5 +14,5 @@ helloRoutes.get('/status', (req, res) => {
     });
 });
 
-export default helloRoutes
+module.exports = helloRoutes
 
