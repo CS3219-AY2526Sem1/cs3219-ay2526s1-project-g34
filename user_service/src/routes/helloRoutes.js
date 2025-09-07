@@ -3,7 +3,7 @@ import express from 'express';
 const helloRoutes = express.Router();
 
 helloRoutes.get('/', (req, res) => {
-    res.json({ message: "goodbye!" })
+    res.json({ message: "hello!" })
 })
 
 helloRoutes.get('/status', (req, res) => {
