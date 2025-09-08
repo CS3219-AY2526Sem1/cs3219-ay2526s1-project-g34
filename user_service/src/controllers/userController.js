@@ -3,13 +3,12 @@ const { User } = require('../models/index.js');
 const userController = {
     createUser: async (req, res) => {
         try {
-            console.log(req.body);
             const user = await User.create(req.body);
             res.status(201).json(user);
         } catch (error) {
             res.status(400).json({ error: error.message })
         }
-    },
+    },  
     getUser: async (req, res) => {
         try {
           const user = await User.findByPk(req.params.id);
@@ -19,6 +18,19 @@ const userController = {
           res.json(user);
         } catch (error) {
           res.status(500).json({ error: error.message });
+        }
+    },
+    login: async (req, res) => {
+        try {
+            const user = await User.findOne({ where: { username: req.body.username }});
+            if (!user) {
+                return res.status(404).json({ error: 'User not found' });
+            }
+
+            await user.comparePassword(req.body.password);
+            res.json(user);
+        } catch (error) {
+            res.status(401).json({ error: "Incorrect username or password"})
         }
     },
 };
