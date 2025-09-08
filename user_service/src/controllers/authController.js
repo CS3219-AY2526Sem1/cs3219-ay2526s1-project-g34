@@ -7,8 +7,9 @@ const authController = {
             if (!user) {
                 return res.status(404).json({ error: 'User not found' });
             }
-
-            await user.comparePassword(req.body.password);
+            if (!await user.comparePassword(req.body.password)) {
+                return res.status(401).json({ error: "Incorrect username or password"})
+            }
             res.json(user);
         } catch (error) {
             res.status(401).json({ error: "Incorrect username or password"})
