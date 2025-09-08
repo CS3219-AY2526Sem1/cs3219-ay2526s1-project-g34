@@ -460,6 +460,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"dotenv@npm:^17.2.2":
+  version: 17.2.2
+  resolution: "dotenv@npm:17.2.2"
+  checksum: 10c0/be66513504590aff6eccb14167625aed9bd42ce80547f4fe5d195860211971a7060949b57108dfaeaf90658f79e40edccd3f233f0a978bff507b5b1565ae162b
+  languageName: node
+  linkType: hard
+
 "dottie@npm:^2.0.6":
   version: 2.0.6
   resolution: "dottie@npm:2.0.6"
@@ -2319,6 +2326,7 @@ __metadata:
   resolution: "user_service@workspace:."
   dependencies:
     bcrypt: "npm:^6.0.0"
+    dotenv: "npm:^17.2.2"
     express: "npm:^5.1.0"
     jsonwebtoken: "npm:^9.0.2"
     morgan: "npm:^1.10.1"
