@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 
-export const SimpleForm = () => {
-  const [data, setData] = useState({ email: '', password: '' });
+export const LoginPage = () => {
+  const [data, setData] = useState({ username: '', password: '' });
 
-  const handleSubmit = async (e: any) => {
+  const handleSubmit = async e => {
     e.preventDefault();
 
     console.log('handle submit')
@@ -12,17 +12,13 @@ export const SimpleForm = () => {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data)
     });
-
-    console.log(response)
-
-    console.log(await response.json());
   };
 
   return (
     <form onSubmit={handleSubmit}>
       <input 
-        placeholder="Email"
-        onChange={(e) => setData({...data, email: e.target.value})}
+        placeholder="Username"
+        onChange={(e) => setData({...data, username: e.target.value})}
       />
       <input 
         type="password"
