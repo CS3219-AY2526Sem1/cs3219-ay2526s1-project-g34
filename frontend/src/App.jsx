@@ -3,23 +3,25 @@ import { ProtectedRoute } from './utils/ProtectedRoute';
 import { useState } from 'react';
 import { HomePage } from './pages/HomePage';
 import { LoginPage } from './pages/LoginPage';
+import { LayoutComponent } from './components/LayoutComponent';
 
 function App() {
   const [user, setUser] = useState(null);
 
   return (
     <BrowserRouter>
-      <div>
         <Routes>
           <Route path="/" element={<LoginPage setUser={setUser} />} />
-          <Route path="/home"
-            element={
-              <ProtectedRoute user={user}>
-                <HomePage />
-              </ProtectedRoute>
-            } />
+          <Route element={<LayoutComponent />}>
+            <Route path="/home"
+              element={
+                <ProtectedRoute user={user}>
+                  <HomePage />
+                </ProtectedRoute>
+              } />
+          </Route>
+
         </Routes>
-      </div>
     </BrowserRouter>
   );
 }
