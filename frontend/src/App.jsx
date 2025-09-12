@@ -6,12 +6,7 @@ import { LoginPage } from './pages/LoginPage';
 
 function App() {
   const [user, setUser] = useState(null);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-
-  useEffect(() => {
-    setIsAuthenticated(!user);
-  }, [])
-
+  
   return (
     <BrowserRouter>
       <div>
