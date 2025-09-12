@@ -12,7 +12,10 @@ const authController = {
                 return res.status(401).json({ error: "Incorrect username or password"})
             }
             const token = authService.generateToken(user);
-            res.json(token);
+            res.json({ token: token, user: {
+                id: user.id,
+                username: user.username
+            } });
         } catch (error) {
             res.status(401).json({ error: "Incorrect username or password"})
         }

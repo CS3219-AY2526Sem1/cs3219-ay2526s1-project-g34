@@ -1,7 +1,7 @@
 export const HomePage = () => {
     return (
         <div>
-            Hello world
+            Hello world authorised
         </div>
     )
 }
