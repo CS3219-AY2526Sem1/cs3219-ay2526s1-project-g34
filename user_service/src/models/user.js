@@ -40,7 +40,15 @@ module.exports = (sequelize, DataTypes) => {
       validate: {
         len: [6, 100]
       }
-    }
+    },
+    role: {
+      type: DataTypes.STRING,
+      allowNull: true,
+      defaultValue: 'user',
+      validate: {
+        isIn: [['user', 'admin']]
+      }
+    },
   }, 
   {
     sequelize,
