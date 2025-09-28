@@ -1,12 +1,30 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { ProtectedRoute } from './utils/ProtectedRoute';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { HomePage } from './pages/HomePage';
 import { LoginPage } from './pages/LoginPage';
 import { LayoutComponent } from './components/LayoutComponent';
+import { CollaborationPage } from './pages/CollaborationPage';
 
 function App() {
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState(() => {
+    try {
+      const savedUser = localStorage.getItem('user');
+      return savedUser ? JSON.parse(savedUser) : null;
+    } catch (error) {
+      console.error('Error parsing saved user:', error);
+      return null;
+    }
+  });
+
+  // persist to localStorage whenever user changes
+  useEffect(() => {
+    if (user) {
+      localStorage.setItem('user', JSON.stringify(user));
+    } else {
+      localStorage.removeItem('user');
+    }
+  })
 
   return (
     <BrowserRouter>
@@ -19,8 +37,14 @@ function App() {
                   <HomePage />
                 </ProtectedRoute>
               } />
+              <Route path="/collaborate"
+                element={
+                  <ProtectedRoute user={user}>
+                    <CollaborationPage />
+                  </ProtectedRoute>
+                }
+                />
           </Route>
-
         </Routes>
     </BrowserRouter>
   );
