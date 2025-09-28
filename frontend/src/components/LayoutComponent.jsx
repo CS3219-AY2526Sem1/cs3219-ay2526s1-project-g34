@@ -6,7 +6,13 @@ export const LayoutComponent = () => {
         <div>
             <header>
                 <nav>
-                    <Link to="/logout">Logout</Link>
+                    <ul>
+                        <li><Link to="/logout">Logout</Link></li>
+                        <li><Link to="/home">Home</Link></li>
+                        <li><Link>create match</Link></li>
+                        <li><Link>find matches</Link></li>
+                        <li><Link to="/collaborate">collaboration</Link></li>
+                    </ul>
                 </nav>
             </header>
             <Outlet />
