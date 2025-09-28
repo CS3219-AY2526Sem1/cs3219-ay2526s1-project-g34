@@ -11,8 +11,6 @@ export const LayoutComponent = () => {
                         <li><Link to="/home">home</Link></li>
                         <li><Link to="/create_match">create match</Link></li>
                         <li><Link to="/matches">find match page</Link></li>
-                        <li><Link>join match page</Link></li>
-                        <li><Link to="/collaborate">match collaboration page</Link></li>
                     </ul>
                 </nav>
             </header>
