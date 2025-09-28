@@ -69,22 +69,18 @@ const io = new Server(httpServer, {
 
 // Socket.IO connection handling with detailed logging
 io.on('connection', (socket) => {
-  console.log('✅ Client Connected:');
-  console.log(`  - ID: ${socket.id}`);
-  console.log(`  - Transport: ${socket.conn.transport.name}`);
-  console.log(`  - Headers: ${JSON.stringify(socket.handshake.headers, null, 2)}`);
-  console.log(`  - Query: ${JSON.stringify(socket.handshake.query, null, 2)}`);
 
-  socket.on('message', (data) => {
-      console.log('📨 Received Message:');
-      console.log(`  - From: ${socket.id}`);
-      console.log(`  - Data: ${JSON.stringify(data, null, 2)}`);
+  socket.on('message', (data, userId) => {
+      // console.log('📨 Received Message:');
+      // console.log(`  - From: ${socket.id}`);
+      // console.log(`  - Data: ${JSON.stringify(data, null, 2)}`);
 
       // Log outgoing response
-      console.log('📤 Sending Response:');
-      console.log(`  - To: ${socket.id}`);
-      console.log(`  - Data: Server received: ${data}`);
-      socket.emit('response', `Server received: ${data}`);
+      // console.log('📤 Sending Response:');
+      // console.log(`  - To: ${socket.id}`);
+      // console.log(`  - Data: Server received: ${data}`);
+      console.log(matches)
+      socket.emit('response', `Server received: ${data} from ${userId}, this is matches ${matches}`);
   });
 
   socket.on('disconnect', (reason) => {
@@ -96,8 +92,18 @@ io.on('connection', (socket) => {
   // match making
 
   socket.on('join-match', (matchId, userId) => {
+    console.log('this is join match, it was called')
     if (!matches[matchId]) {
+    console.log('join match match not found')
+
       socket.emit('error', 'match not found!')
+      return
+    }
+    const existingUser = matches[matchId].participants.find(p => p.userId === userId)
+    if (existingUser) {
+    console.log('join match, existing user found')
+
+      socket.emit('error', 'User already in match' )
       return
     }
 
@@ -106,6 +112,7 @@ io.on('connection', (socket) => {
       userId,
       socketId: socket.id
     })
+    console.log(matches[matchId])
     socket.to(matchId).emit('user-joined', {userId, matchId})
     socket.emit('match-joined', matches[matchId])
   })
@@ -122,6 +129,11 @@ app.get('/health', (req, res) => {
     timestamp: new Date().toISOString() 
   });
 });
+
+app.get('/matches', (req,res) => {
+  const allMatches = Object.values(matches)
+  res.json(allMatches);
+})
 
 
 app.post('/matches', (req, res) => {

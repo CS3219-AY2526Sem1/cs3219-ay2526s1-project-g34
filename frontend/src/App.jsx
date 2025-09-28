@@ -4,8 +4,9 @@ import { useState, useEffect } from 'react';
 import { HomePage } from './pages/HomePage';
 import { LoginPage } from './pages/LoginPage';
 import { LayoutComponent } from './components/LayoutComponent';
-import { CollaborationPage } from './pages/CollaborationPage';
+import { MatchRoom } from './pages/MatchRoom';
 import { CreateMatchPage } from './pages/CreateMatchPage';
+import { MatchesPage } from './pages/MatchesPage';
 
 function App() {
   const [user, setUser] = useState(() => {
@@ -38,17 +39,24 @@ function App() {
                   <HomePage user={user} />
                 </ProtectedRoute>
               } />
-              <Route path="/collaborate"
+              <Route path="/match/:matchId"
                 element={
                   <ProtectedRoute user={user}>
-                    <CollaborationPage />
+                    <MatchRoom user={user} />
                   </ProtectedRoute>
                 }
                 />
               <Route path="/create_match"
                 element={
                   <ProtectedRoute user={user}>
-                    <CreateMatchPage />
+                    <CreateMatchPage user={user} />
+                  </ProtectedRoute>
+                }
+                />
+              <Route path="/matches"
+                element={
+                  <ProtectedRoute user={user}>
+                    <MatchesPage />
                   </ProtectedRoute>
                 }
                 />

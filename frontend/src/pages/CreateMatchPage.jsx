@@ -13,7 +13,7 @@ export const CreateMatchPage = () => {
       });
       const result = await response.json();
       if (response.ok) {
-        navigate('/collaborate');
+        navigate('/matches');
       }
     };
   

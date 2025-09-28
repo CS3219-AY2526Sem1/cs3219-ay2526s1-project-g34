@@ -1,7 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { io } from 'socket.io-client';
+import { useParams } from 'react-router-dom'
 
-export const CollaborationPage = () => {
+export const MatchRoom = (user) => {
+
+  const {matchId} = useParams()
+
   const [socket, setSocket] = useState(null);
   const [isConnected, setIsConnected] = useState(false);
   const [messages, setMessages] = useState([]);
@@ -19,8 +23,11 @@ export const CollaborationPage = () => {
     newSocket.on('connect', () => {
       console.log('Connected! lol');
       setIsConnected(true);
-      console.log('✅ WS Connected! SID:', socket.id);
-      newSocket.emit('message', 'Hello from client!');  // Test emission
+      console.log('✅ WS Connected! SID:', newSocket.id);
+      newSocket.emit('message', `hello from server, this is match id ${matchId}`, user.user.id);  // Test emission
+
+      // try join match
+      newSocket.emit('join-match', matchId, user.user.id)
       setMessages(prev => [...prev, 'Connected to server']);
     });
 
@@ -43,6 +50,17 @@ export const CollaborationPage = () => {
         console.log('❌ Disconnected:', reason);
     });
 
+    newSocket.on('match-joined', (matchData) => {
+      console.log('✅ Successfully joined match:', matchData);
+      setMessages(prev => [...prev, `Joined match: ${matchId}`]);
+    });
+
+    newSocket.on('user-joined', (data) => {
+      console.log('👤 User joined:', data);
+      setMessages(prev => [...prev, `User ${data.userId} joined`]);
+    });
+  
+
     setSocket(newSocket);
 
     return () => {
@@ -52,8 +70,8 @@ export const CollaborationPage = () => {
 
   const sendMessage = () => {
     if (socket && inputMessage.trim()) {
-      socket.emit('message', inputMessage);
-      setMessages(prev => [...prev, `You: ${inputMessage}`]);
+      socket.emit('message', inputMessage, user.user.id);
+      setMessages(prev => [...prev, `You: User id: ${user.user.id} ${inputMessage}`]);
       setInputMessage('');
     }
   };
