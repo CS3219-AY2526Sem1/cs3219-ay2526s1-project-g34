@@ -10,17 +10,6 @@ const matches = {}
 
 // Apply middleware BEFORE Socket.IO routes
 app.use(morgan('debug'));
-// app.use((req, res, next) => {
-//   console.log('📥 Incoming Request to Socket Server:');
-//   console.log(`  - Method: ${req.method}`);
-//   console.log(`  - URL: ${req.url}`);
-//   console.log(`  - Headers: ${JSON.stringify(req.headers, null, 2)}`);
-//   console.log(`  - Query: ${JSON.stringify(req.query, null, 2)}`);
-//   if (req.body) {
-//       console.log(`  - Body: ${JSON.stringify(req.body, null, 2)}`);
-//   }
-//   next();
-// });
 
 app.use((req, res, next) => {
   const originalSend = res.send;
@@ -69,11 +58,6 @@ const io = new Server(httpServer, {
 
 // Socket.IO connection handling with detailed logging
 io.on('connection', (socket) => {
-
-  socket.on('message', (data, userId) => {
-      console.log(matches)
-      socket.emit('response', `Server received: ${data} from ${userId}, this is matches ${matches}`);
-  });
 
   socket.on('disconnect', (reason) => {
       console.log('❌ Client Disconnected:');
