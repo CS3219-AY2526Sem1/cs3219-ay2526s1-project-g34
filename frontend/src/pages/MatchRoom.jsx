@@ -1,10 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { io } from 'socket.io-client';
-import { useParams } from 'react-router-dom'
+import { useParams, Link, Navigate, useNavigate } from 'react-router-dom'
 
 export const MatchRoom = (user) => {
 
   const {matchId} = useParams()
+
+  const navigate = useNavigate()
 
   const [socket, setSocket] = useState(null);
   const [isConnected, setIsConnected] = useState(false);
@@ -45,13 +47,17 @@ export const MatchRoom = (user) => {
       setCode(data.code);
       console.log('this is code now', code)
     })
+
+    newSocket.on('match-ended', (data) => {
+      navigate('/home')
+    })
   
     setSocket(newSocket);
 
     return () => {
       newSocket.close();
     };
-  }, [matchId, user.user.id]);
+  }, [matchId, user.user.id, navigate]);
 
 
 
@@ -63,10 +69,18 @@ export const MatchRoom = (user) => {
       socket.emit('code-update', matchId, user.user.id, newCode);
     }
   };
+  
+  const handleEndMatch = () => {
+    if(socket) {
+      console.log('end match triggered by client')
+      socket.emit('end-match', matchId)
+    }
+  }
 
   return (
     <div>
       <h1>code pad</h1>
+      <button onClick={handleEndMatch}>end match</button>
 
       <div>
         Connection Status: {isConnected ? 'Connected' : 'Disconnected'} to session {matchId}

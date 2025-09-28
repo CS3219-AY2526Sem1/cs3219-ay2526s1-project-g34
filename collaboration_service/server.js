@@ -102,6 +102,16 @@ io.on('connection', (socket) => {
       code: newCode
     })
   })
+
+  // ending match
+  socket.on('end-match', (matchId) => {
+    console.log('received end match')
+    if (!matches[matchId]) return
+    delete matches[matchId];
+    console.log('running end match')
+    io.to(matchId).emit('match-ended');
+    io.in(matchId).socketsLeave(matchId);
+  })
 });
 
 app.get('/', (req, res) => {
