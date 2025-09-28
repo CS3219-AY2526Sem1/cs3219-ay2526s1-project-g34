@@ -5,6 +5,7 @@ import { HomePage } from './pages/HomePage';
 import { LoginPage } from './pages/LoginPage';
 import { LayoutComponent } from './components/LayoutComponent';
 import { CollaborationPage } from './pages/CollaborationPage';
+import { CreateMatchPage } from './pages/CreateMatchPage';
 
 function App() {
   const [user, setUser] = useState(() => {
@@ -34,13 +35,20 @@ function App() {
             <Route path="/home"
               element={
                 <ProtectedRoute user={user}>
-                  <HomePage />
+                  <HomePage user={user} />
                 </ProtectedRoute>
               } />
               <Route path="/collaborate"
                 element={
                   <ProtectedRoute user={user}>
                     <CollaborationPage />
+                  </ProtectedRoute>
+                }
+                />
+              <Route path="/create_match"
+                element={
+                  <ProtectedRoute user={user}>
+                    <CreateMatchPage />
                   </ProtectedRoute>
                 }
                 />

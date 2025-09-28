@@ -1,9 +1,12 @@
 const express = require('express');
 const morgan = require('morgan');
+const uuid = require('uuid')
 const { createServer } = require('http');
 const { Server } = require('socket.io');
+const { match } = require('assert');
 
 const app = express();
+const matches = {}
 
 // Apply middleware BEFORE Socket.IO routes
 app.use(morgan('debug'));
@@ -89,6 +92,23 @@ io.on('connection', (socket) => {
       console.log(`  - ID: ${socket.id}`);
       console.log(`  - Reason: ${reason}`);
   });
+
+  // match making
+
+  socket.on('join-match', (matchId, userId) => {
+    if (!matches[matchId]) {
+      socket.emit('error', 'match not found!')
+      return
+    }
+
+    socket.join(matchId)
+    matches[matchId].participants.push({
+      userId,
+      socketId: socket.id
+    })
+    socket.to(matchId).emit('user-joined', {userId, matchId})
+    socket.emit('match-joined', matches[matchId])
+  })
 });
 
 app.get('/', (req, res) => {
@@ -102,6 +122,29 @@ app.get('/health', (req, res) => {
     timestamp: new Date().toISOString() 
   });
 });
+
+
+app.post('/matches', (req, res) => {
+  const matchId = uuid.v4();
+  matches[matchId] = {
+    id: matchId,
+    status: 'waiting',
+    participants: []
+  }
+  console.log('match cretaed!')
+  console.log(matches)
+  res.json({matchId})
+})
+
+app.get('/matches/:id', (req,res) => {
+  const match = matches[req.params.id]
+  if (!match) {
+    return res.status(404).json({error: "no match found"})
+  }
+  res.json(match);
+})
+
+app.use(express.json())
 
 // Listen on HTTP server
 httpServer.listen(3003, () => {

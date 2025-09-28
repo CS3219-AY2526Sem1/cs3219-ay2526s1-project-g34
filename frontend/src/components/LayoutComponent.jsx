@@ -7,11 +7,12 @@ export const LayoutComponent = () => {
             <header>
                 <nav>
                     <ul>
-                        <li><Link to="/logout">Logout</Link></li>
-                        <li><Link to="/home">Home</Link></li>
-                        <li><Link>create match</Link></li>
-                        <li><Link>find matches</Link></li>
-                        <li><Link to="/collaborate">collaboration</Link></li>
+                        <li><Link to="/logout">logout</Link></li>
+                        <li><Link to="/home">home</Link></li>
+                        <li><Link to="/create_match">create match</Link></li>
+                        <li><Link>find match page</Link></li>
+                        <li><Link>join match page</Link></li>
+                        <li><Link to="/collaborate">match collaboration page</Link></li>
                     </ul>
                 </nav>
             </header>

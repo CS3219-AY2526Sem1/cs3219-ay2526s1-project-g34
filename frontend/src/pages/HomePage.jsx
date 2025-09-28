@@ -1,7 +1,7 @@
-export const HomePage = () => {
+export const HomePage = (user) => {
     return (
         <div>
-            Hello world authorised
+            Hello world authorised {user.user.username}
         </div>
     )
 }
