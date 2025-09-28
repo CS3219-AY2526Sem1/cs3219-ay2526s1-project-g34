@@ -71,14 +71,6 @@ const io = new Server(httpServer, {
 io.on('connection', (socket) => {
 
   socket.on('message', (data, userId) => {
-      // console.log('📨 Received Message:');
-      // console.log(`  - From: ${socket.id}`);
-      // console.log(`  - Data: ${JSON.stringify(data, null, 2)}`);
-
-      // Log outgoing response
-      // console.log('📤 Sending Response:');
-      // console.log(`  - To: ${socket.id}`);
-      // console.log(`  - Data: Server received: ${data}`);
       console.log(matches)
       socket.emit('response', `Server received: ${data} from ${userId}, this is matches ${matches}`);
   });
@@ -95,18 +87,18 @@ io.on('connection', (socket) => {
     console.log('this is join match, it was called')
     if (!matches[matchId]) {
     console.log('join match match not found')
-
       socket.emit('error', 'match not found!')
       return
     }
     const existingUser = matches[matchId].participants.find(p => p.userId === userId)
     if (existingUser) {
     console.log('join match, existing user found')
-
+      socket.join(matchId)
       socket.emit('error', 'User already in match' )
       return
     }
 
+    console.log('join match successfully running rest of logic')
     socket.join(matchId)
     matches[matchId].participants.push({
       userId,
@@ -115,6 +107,16 @@ io.on('connection', (socket) => {
     console.log(matches[matchId])
     socket.to(matchId).emit('user-joined', {userId, matchId})
     socket.emit('match-joined', matches[matchId])
+  })
+
+  socket.on('code-update', (matchId, userId, newCode) => {
+    if (!matches[matchId]) return
+    console.log('code update emit')
+    matches[matchId].state.code = newCode;
+    console.log('emit code-updated to ', matchId)
+    io.to(matchId).emit('code-updated', {
+      code: newCode
+    })
   })
 });
 
@@ -141,7 +143,10 @@ app.post('/matches', (req, res) => {
   matches[matchId] = {
     id: matchId,
     status: 'waiting',
-    participants: []
+    participants: [],
+    state: {
+      code: ''
+    }
   }
   console.log('match cretaed!')
   console.log(matches)

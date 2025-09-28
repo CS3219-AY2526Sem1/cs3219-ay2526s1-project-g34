@@ -11,6 +11,9 @@ export const MatchRoom = (user) => {
   const [messages, setMessages] = useState([]);
   const [inputMessage, setInputMessage] = useState('');
 
+
+  const [code, setCode] = useState('');
+
   useEffect(() => {
     console.log('1')
     const newSocket = io('http://localhost:3001/', {
@@ -18,49 +21,44 @@ export const MatchRoom = (user) => {
         reconnection: false,
     });
     // const newSocket = io('http://localhost:3003');
-    console.log('2')
 
     newSocket.on('connect', () => {
-      console.log('Connected! lol');
       setIsConnected(true);
       console.log('✅ WS Connected! SID:', newSocket.id);
       newSocket.emit('message', `hello from server, this is match id ${matchId}`, user.user.id);  // Test emission
 
       // try join match
       newSocket.emit('join-match', matchId, user.user.id)
-      setMessages(prev => [...prev, 'Connected to server']);
     });
 
     newSocket.on('disconnect', () => {
       console.log('Disconnected');
       setIsConnected(false);
-      setMessages(prev => [...prev, 'Disconnected from server']);
     });
 
-    newSocket.on('response', (data) => {
-      console.log('Received:', data);
-      setMessages(prev => [...prev, `Server: ${data}`]);
-    });
+    // newSocket.on('response', (data) => {
+    //   console.log('Received:', data);
+    //   setMessages(prev => [...prev, `Server: ${data}`]);
+    // });
 
-    newSocket.on('connect_error', (err) => {
-        console.error('❌ Connect Error:', err.message);
-    });
-    
-    newSocket.on('disconnect', (reason) => {
-        console.log('❌ Disconnected:', reason);
-    });
+    // newSocket.on('connect_error', (err) => {
+    //     console.error('❌ Connect Error:', err.message);
+    // });
 
     newSocket.on('match-joined', (matchData) => {
       console.log('✅ Successfully joined match:', matchData);
-      setMessages(prev => [...prev, `Joined match: ${matchId}`]);
     });
 
     newSocket.on('user-joined', (data) => {
       console.log('👤 User joined:', data);
-      setMessages(prev => [...prev, `User ${data.userId} joined`]);
     });
-  
 
+    newSocket.on('code-updated', (data) => {
+      console.log('code updated!')
+      setCode(data.code);
+      console.log('this is code now', code)
+    })
+  
     setSocket(newSocket);
 
     return () => {
@@ -70,9 +68,7 @@ export const MatchRoom = (user) => {
 
   const sendMessage = () => {
     if (socket && inputMessage.trim()) {
-      socket.emit('message', inputMessage, user.user.id);
-      setMessages(prev => [...prev, `You: User id: ${user.user.id} ${inputMessage}`]);
-      setInputMessage('');
+      socket.emit('code-update', matchId, user.user.id, inputMessage )
     }
   };
 
@@ -99,10 +95,13 @@ export const MatchRoom = (user) => {
 
       <div>
         <h3>Messages:</h3>
-        <div>
+        {/* <div>
           {messages.map((msg, index) => (
             <div key={index}>{msg}</div>
           ))}
+        </div> */}
+        <div>
+          {code}
         </div>
       </div>
     </div>
