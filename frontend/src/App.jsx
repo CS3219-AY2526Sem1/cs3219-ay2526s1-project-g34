@@ -28,11 +28,17 @@ function App() {
     }
   })
 
+  const handleLogout = () => {
+    localStorage.removeItem('jwt_token');
+    setUser(null);
+    window.location.href = '/';
+}
+
   return (
     <BrowserRouter>
         <Routes>
           <Route path="/" element={<LoginPage setUser={setUser} />} />
-          <Route element={<LayoutComponent />}>
+          <Route element={<LayoutComponent handleLogout={handleLogout} />}>
             <Route path="/home"
               element={
                 <ProtectedRoute user={user}>
