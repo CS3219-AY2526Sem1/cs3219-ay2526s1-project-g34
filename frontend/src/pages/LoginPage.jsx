@@ -33,6 +33,7 @@ export const LoginPage = ({ setUser }) => {
         onChange={(e) => setData({...data, password: e.target.value})}
       />
       <button type="submit">Submit</button>
+      <button type="button" onClick={() => navigate('/signup')}>Don't have an account? click here to sign up</button>
     </form>
   );
 }
