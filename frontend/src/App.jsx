@@ -8,6 +8,8 @@ import { MatchRoom } from './pages/MatchRoom';
 import { CreateMatchPage } from './pages/CreateMatchPage';
 import { MatchesPage } from './pages/MatchesPage';
 import { SignupPage } from './pages/SignupPage';
+import { QuestionManagerPage } from './pages/QuestionManagerPage';
+
 
 function App() {
   const [user, setUser] = useState(() => {
@@ -40,6 +42,7 @@ function App() {
         <Routes>
           <Route path="/" element={<LoginPage setUser={setUser} />} />
           <Route path="/signup" element={<SignupPage setUser={setUser} />} />
+          <Route path="/questionmanager" element={<QuestionManagerPage setUser={setUser} />} />
           <Route element={<LayoutComponent handleLogout={handleLogout} />}>
             <Route path="/home"
               element={
