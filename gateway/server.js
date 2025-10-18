@@ -126,6 +126,21 @@ app.use('/api/matches', createProxyMiddleware({
     }
 }))
 
+app.use('/api/questions', createProxyMiddleware({
+    target: 'http://localhost:3004',
+    changeOrigin: true,
+    pathRewrite: {'^/': '/questions/'},
+    logger: console,
+    on: {
+        proxyReq: (proxyReq, req, res) => {
+            console.log(req.originalUrl);
+            console.log(req.path);
+            console.log(proxyReq.path);
+            console.log(req.body)
+        }
+    }
+}))
+
 app.use(express.json());
 
 // WebSocket proxy for Socket.IO

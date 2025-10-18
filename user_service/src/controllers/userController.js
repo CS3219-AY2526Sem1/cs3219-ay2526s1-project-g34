@@ -1,10 +1,20 @@
 const { User } = require('../models/index.js');
+const { authService } = require('../service/authService.js');
 
 const userController = {
     createUser: async (req, res) => {
         try {
+            const existingUser = await User.findOne({ where: { username: req.body.username }});
+            if (existingUser) {
+                return res.status(400).json({ error: 'Username already exists' });
+            }
             const user = await User.create(req.body);
-            res.status(201).json(user);
+
+            const token = authService.generateToken(user);
+            res.status(201).json({ token: token, user: {
+                id: user.id,
+                username: user.username
+            } });
         } catch (error) {
             res.status(400).json({ error: error.message })
         }
