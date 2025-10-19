@@ -42,8 +42,14 @@ function App() {
         <Routes>
           <Route path="/" element={<LoginPage setUser={setUser} />} />
           <Route path="/signup" element={<SignupPage setUser={setUser} />} />
-          <Route path="/questionmanager" element={<QuestionManagerPage setUser={setUser} />} />
-          <Route element={<LayoutComponent handleLogout={handleLogout} />}>
+          <Route element={<LayoutComponent handleLogout={handleLogout} user={user}/>}>
+
+            <Route path="/questionmanager" 
+              element={
+                <ProtectedRoute user={user} requiredRole="admin">
+                  <QuestionManagerPage setUser={user} />
+                </ProtectedRoute>
+              } />
             <Route path="/home"
               element={
                 <ProtectedRoute user={user}>
