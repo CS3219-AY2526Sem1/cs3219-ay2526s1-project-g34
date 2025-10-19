@@ -13,7 +13,8 @@ const userController = {
             const token = authService.generateToken(user);
             res.status(201).json({ token: token, user: {
                 id: user.id,
-                username: user.username
+                username: user.username,
+                role: user.role
             } });
         } catch (error) {
             res.status(400).json({ error: error.message })

@@ -26,7 +26,7 @@ app.use((req, res, next) => {
 
 app.use(cors({
     origin: 'http://localhost:5173',
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
     allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true,
     exposedHeaders: ['Set-Cookie'],
@@ -129,7 +129,7 @@ app.use('/api/matches', createProxyMiddleware({
 app.use('/api/questions', createProxyMiddleware({
     target: 'http://localhost:3004',
     changeOrigin: true,
-    pathRewrite: {'^/': '/questions/'},
+    pathRewrite: {'^/api/questions': '/questions/'},
     logger: console,
     on: {
         proxyReq: (proxyReq, req, res) => {
