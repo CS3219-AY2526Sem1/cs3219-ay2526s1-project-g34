@@ -4,20 +4,22 @@ const { Question } = require('../../models');
 const ALLOWED_DIFFICULTIES = new Set(['easy', 'medium', 'hard']);
 
 /* ---------- helpers ---------- */
-function getPaging(req) {
-  const limit = Math.min(Math.max(parseInt(req.query.limit ?? '20', 10), 1), 100);
-  const page = Math.max(parseInt(req.query.page ?? '1', 10), 1);
-  const offset = (page - 1) * limit;
-  return { limit, page, offset };
-}
 
 function normTopics(val) {
-  if (val === undefined || val === null) return [];
-  if (Array.isArray(val)) return val;
-  if (typeof val === 'string') return [val];
-  return [];
+  if (val == null) return [];
+
+  let arr = [];
+  if (Array.isArray(val)) arr = val;
+  else if (typeof val === 'string') arr = [val];
+  else return [];
+
+  return arr
+    .map(s => String(s).trim())     // trim each entry
+    .filter(Boolean);               // remove empty strings
 }
 
+/* ---------- controller functions ---------- */
+// POST /questions
 async function createQuestion(req, res) {
   try {
     const { title, description, difficulty, topics } = req.body;
@@ -50,56 +52,27 @@ async function createQuestion(req, res) {
 // GET /questions
 async function listQuestions(req, res) {
   try {
-    const { limit, page, offset } = getPaging(req);
-    const { difficulty, q, topic } = req.query;
-
-    const where = {};
-    if (difficulty) {
-      if (!ALLOWED_DIFFICULTIES.has(difficulty)) {
-        return res.status(400).json({ error: 'invalid difficulty' });
-      }
-      where.difficulty = difficulty;
-    }
-    if (q) {
-      where[Op.or] = [
-        { title: { [Op.iLike]: `%${q}%` } },
-        { description: { [Op.iLike]: `%${q}%` } },
-      ];
-    }
-
-    const { rows, count } = await Question.findAndCountAll({
-      where,
+    const questions = await Question.findAll({
       order: [['id', 'ASC']],
-      limit,
-      offset,
     });
-
-    // topic filter (since topics is JSON, not JSONB)
-    const filtered = topic
-      ? rows.filter(r =>
-          Array.isArray(r.topics) &&
-          r.topics.map(x => String(x).toLowerCase()).includes(String(topic).toLowerCase())
-        )
-      : rows;
-
-    return res.json({ data: filtered, page, limit, total: count });
+    return res.json({ data: questions });
   } catch (e) {
     console.error('[questions.list]', e);
-    return res.status(500).json({ error: 'Failed to list questions' });
+    return res.status(500).json({ error: e.message || 'Failed to list questions' });
   }
 }
 
-// GET /questions/:id
-async function getQuestionById(req, res) {
-  try {
-    const q = await Question.findByPk(req.params.id);
-    if (!q) return res.status(404).json({ error: 'Not found' });
-    return res.json(q);
-  } catch (e) {
-    console.error('[questions.getOne]', e);
-    return res.status(500).json({ error: 'Failed to fetch question' });
-  }
-}
+// // GET /questions/:id
+// async function getQuestionById(req, res) {
+//   try {
+//     const q = await Question.findByPk(req.params.id);
+//     if (!q) return res.status(404).json({ error: 'Not found' });
+//     return res.json(q);
+//   } catch (e) {
+//     console.error('[questions.getOne]', e);
+//     return res.status(500).json({ error: 'Failed to fetch question' });
+//   }
+// }
 
 // PATCH /questions/:id
 async function updateQuestionById(req, res) {
@@ -156,7 +129,7 @@ async function randomQuestion(req, res) {
       where.difficulty = difficulty;
     }
 
-    let candidates = await Question.findAll({ where, limit: 200, order: [['id', 'ASC']] });
+    let candidates = await Question.findAll({ where, order: [['id', 'ASC']] });
 
     if (topic) {
       const t = String(topic).toLowerCase();
@@ -178,7 +151,7 @@ async function randomQuestion(req, res) {
 module.exports = {
   createQuestion,
   listQuestions,
-  getQuestionById,
+  // getQuestionById,
   updateQuestionById,
   deleteQuestionById,
   randomQuestion,

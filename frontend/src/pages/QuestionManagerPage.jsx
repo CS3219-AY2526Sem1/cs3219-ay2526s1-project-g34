@@ -88,24 +88,24 @@ export const QuestionManagerPage = ({ user }) => {
     };
 
     const saveEdit = async (e) => {
-    e.preventDefault();
-    const res = await fetch(`http://localhost:3001/api/questions/${editing.id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-        title: editForm.title,
-        description: editForm.description,
-        difficulty: editForm.difficulty,
-        topics: editForm.topics.split(',').map(s=>s.trim()).filter(Boolean),
-        }),
-    });
-    if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        alert(err.error || `Update failed (HTTP ${res.status})`);
-        return;
-    }
-    closeEdit();
-    fetchQuestions();
+        e.preventDefault();
+        const res = await fetch(`http://localhost:3001/api/questions/${editing.id}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+            title: editForm.title,
+            description: editForm.description,
+            difficulty: editForm.difficulty,
+            topics: editForm.topics.split(',').map(s=>s.trim()).filter(Boolean),
+            }),
+        });
+        if (!res.ok) {
+            const err = await res.json().catch(() => ({}));
+            alert(err.error || `Update failed (HTTP ${res.status})`);
+            return;
+        }
+        closeEdit();
+        fetchQuestions();
     };
 
 

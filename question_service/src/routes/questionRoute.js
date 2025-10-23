@@ -6,7 +6,7 @@ const router = express.Router();
 router.post('/', questionController.createQuestion);
 router.get('/', questionController.listQuestions);
 router.get('/random', questionController.randomQuestion);
-router.get('/:id', questionController.getQuestionById);
+// router.get('/:id', questionController.getQuestionById);
 router.patch('/:id', questionController.updateQuestionById);
 router.delete('/:id', questionController.deleteQuestionById);
 
