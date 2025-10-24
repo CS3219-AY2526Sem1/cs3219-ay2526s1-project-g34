@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 export const SignupPage = ({ setUser }) => {
-    const [data, setData] = useState({ username: '', password: ''});
+    const [data, setData] = useState({ username: '', password: '', role: 'user' });
     const [confirmPassword, setConfirmPassword] = useState('');
     const navigate = useNavigate();
 
@@ -27,6 +27,13 @@ export const SignupPage = ({ setUser }) => {
         }
     };
 
+    const [isAdmin, setIsAdmin] = useState(false); // Initialize state to false (off)
+
+const handleToggle = () => {
+        const newRole = data.role === 'user' ? 'admin' : 'user';
+        setData({ ...data, role: newRole });
+    };
+
 
   return (
     <form onSubmit={handleSubmit}>
@@ -44,6 +51,9 @@ export const SignupPage = ({ setUser }) => {
             placeholder="Confirm Password" 
             onChange={(e) => setConfirmPassword(e.target.value)}
         />
+        <button type="button" onClick={handleToggle}>
+            {data.role === 'user' ? 'User' : 'Admin'}
+        </button>
         <button type="submit">Submit</button>
         <button type="button" onClick={() => navigate('/')}>Already have an account? Click here to log in</button>
     </form>
