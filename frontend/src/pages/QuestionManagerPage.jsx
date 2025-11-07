@@ -14,7 +14,7 @@ export const QuestionManagerPage = ({ user }) => {
             return;
         }
 
-        const response = await fetch('http://localhost:3001/api/questions', {
+        const response = await fetch('http://localhost:3002/questions', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -37,7 +37,7 @@ export const QuestionManagerPage = ({ user }) => {
 
     const fetchQuestions = async () => {
         try {
-            const res = await fetch('http://localhost:3001/api/questions');
+            const res = await fetch('http://localhost:3002/questions');
             if (!res.ok) throw new Error(`HTTP ${res.status}`);
             const data = await res.json();
             setQuestions(data.data || []);  // backend returns { data: [...] }
@@ -53,7 +53,7 @@ export const QuestionManagerPage = ({ user }) => {
     // deleting question
     const deleteQuestion = async (id) => {
         if (!confirm('Delete this question?')) return;
-        const res = await fetch(`http://localhost:3001/api/questions/${id}`, {
+        const res = await fetch(`http://localhost:3002/questions/${id}`, {
             method: 'DELETE',
         });
 
@@ -89,7 +89,7 @@ export const QuestionManagerPage = ({ user }) => {
 
     const saveEdit = async (e) => {
         e.preventDefault();
-        const res = await fetch(`http://localhost:3001/api/questions/${editing.id}`, {
+        const res = await fetch(`http://localhost:3002/questions/${editing.id}`, {
             method: 'PATCH',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
