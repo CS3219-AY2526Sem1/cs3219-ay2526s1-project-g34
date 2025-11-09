@@ -1,5 +1,6 @@
 const express = require('express');
 const morgan = require('morgan');
+const cors = require('cors');
 const uuid = require('uuid')
 const { createServer } = require('http');
 const { Server } = require('socket.io');
@@ -8,8 +9,17 @@ const { match } = require('assert');
 const app = express();
 const matches = {}
 
+// CORS configuration
+app.use(cors({
+    origin: ['http://localhost', 'http://localhost:80', 'http://localhost:5173'],
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    credentials: true
+}));
+
 // Apply middleware BEFORE Socket.IO routes
 app.use(morgan('debug'));
+app.use(express.json());
 
 app.use((req, res, next) => {
   const originalSend = res.send;
@@ -58,6 +68,9 @@ const io = new Server(httpServer, {
 
 // Socket.IO connection handling with detailed logging
 io.on('connection', (socket) => {
+  console.log('✅ New Socket.IO Connection:');
+  console.log(`  - Socket ID: ${socket.id}`);
+  console.log(`  - Transport: ${socket.conn.transport.name}`);
 
   socket.on('disconnect', (reason) => {
       console.log('❌ Client Disconnected:');
@@ -154,8 +167,6 @@ app.get('/matches/:id', (req,res) => {
   }
   res.json(match);
 })
-
-app.use(express.json())
 
 // Listen on HTTP server
 httpServer.listen(3003, () => {

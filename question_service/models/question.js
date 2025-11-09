@@ -11,7 +11,7 @@ module.exports = (sequelize, DataTypes) => {
       title: { type: DataTypes.STRING, allowNull: false, unique: true },
       description: { type: DataTypes.TEXT, allowNull: false },
       difficulty: { type: DataTypes.ENUM('easy','medium','hard'), allowNull: false},
-      topics: { type: DataTypes.JSON, allowNull: false, defaultValue: [] } // you chose JSON; fine
+      topics: { type: DataTypes.ARRAY(DataTypes.TEXT), allowNull: true, defaultValue: [] }
     },
     {
       sequelize,
