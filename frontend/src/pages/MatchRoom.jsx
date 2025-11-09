@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { io } from 'socket.io-client';
-import { useParams, Link, Navigate, useNavigate } from 'react-router-dom'
+import { useParams, Link, Navigate, useNavigate, useLocation } from 'react-router-dom'
 
 export const MatchRoom = (user) => {
 
@@ -12,6 +12,15 @@ export const MatchRoom = (user) => {
   const [isConnected, setIsConnected] = useState(false);
 
   const [code, setCode] = useState('');
+  const location = useLocation();
+  const matchData = location.state?.matchData;
+  if (!matchData) {
+    // Handle the case where someone navigated directly or the state was lost
+    return <div>Error: Match data not found.</div>;
+  }
+  const { sessionId, partnerId, question} = matchData;
+  console.log('match data in match room', matchData)
+
 
   useEffect(() => {
     console.log('1')
@@ -87,6 +96,14 @@ export const MatchRoom = (user) => {
       </div>
 
       <div>
+        <h2>Question:</h2>
+        <div>
+          <h3>{question.id}. {question.title}</h3>
+          <p>{question.description}</p>
+          <p>Difficulty: {question.difficulty}</p>
+          <p>Topic: {question.topics}</p>
+        </div>
+      
         <div>
           <textarea
             value={code}

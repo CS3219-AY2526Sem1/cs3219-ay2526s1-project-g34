@@ -132,6 +132,9 @@ app.get('/matches', (req,res) => {
 })
 
 
+
+
+
 app.post('/matches', (req, res) => {
   const matchId = uuid.v4();
   matches[matchId] = {
@@ -140,7 +143,8 @@ app.post('/matches', (req, res) => {
     participants: [],
     state: {
       code: ''
-    }
+    },
+    
   }
   console.log('match cretaed!')
   console.log(matches)
