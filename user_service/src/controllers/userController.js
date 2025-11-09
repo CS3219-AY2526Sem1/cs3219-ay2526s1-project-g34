@@ -4,6 +4,23 @@ const { authService } = require('../service/authService.js');
 const userController = {
     createUser: async (req, res) => {
         try {
+            console.log('Request body:', req.body);
+            console.log('Request headers:', req.headers);
+            
+            if (!req.body) {
+                return res.status(400).json({ 
+                    error: 'Request body is required. Make sure to include Content-Type: application/json header.' 
+                });
+            }
+            
+            if (!req.body.username) {
+                return res.status(400).json({ error: 'Username is required' });
+            }
+            
+            if (!req.body.password) {
+                return res.status(400).json({ error: 'Password is required' });
+            }
+            
             const existingUser = await User.findOne({ where: { username: req.body.username }});
             if (existingUser) {
                 return res.status(400).json({ error: 'Username already exists' });
@@ -17,6 +34,7 @@ const userController = {
                 role: user.role
             } });
         } catch (error) {
+            console.error('Error in createUser:', error);
             res.status(400).json({ error: error.message })
         }
     },  

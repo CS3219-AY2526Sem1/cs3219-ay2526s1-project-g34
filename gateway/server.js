@@ -34,7 +34,7 @@ app.use(cors({
 }))
 
 const ioProxy = createProxyMiddleware({
-    target: 'http://localhost:3003',
+    target: 'http://collaboration_service:3003',
     changeOrigin: true,
     ws: true,
     logLevel: 'debug',  // For better logging
@@ -90,16 +90,16 @@ server.on('upgrade', (request, socket, head) => {
 
 
 app.use('/api/users', createProxyMiddleware({
-    target: 'http://localhost:3002',
+    target: 'http://user_service:3002',
     changeOrigin: true,
-    pathRewrite: { '^/': '/users' },
+    pathRewrite: { '^/api/users': '/users' },
     logger: console,
 }))
 
 app.use('/api/auth', createProxyMiddleware({
-    target: 'http://localhost:3002',
+    target: 'http://user_service:3002',
     changeOrigin: true,
-    pathRewrite: { '^/': '/auth/' },
+    pathRewrite: { '^/api/auth': '/auth' },
     logger: console,
     on: {
         proxyReq: (proxyReq, req, res) => {
@@ -112,9 +112,9 @@ app.use('/api/auth', createProxyMiddleware({
 }))
 
 app.use('/api/matches', createProxyMiddleware({
-    target: 'http://localhost:3003',
+    target: 'http://collaboration_service:3003',
     changeOrigin: true,
-    pathRewrite: {'^/': '/matches/'},
+    pathRewrite: {'^/api/matches': '/matches'},
     logger: console,
     on: {
         proxyReq: (proxyReq, req, res) => {
@@ -127,9 +127,9 @@ app.use('/api/matches', createProxyMiddleware({
 }))
 
 app.use('/api/questions', createProxyMiddleware({
-    target: 'http://localhost:3004',
+    target: 'http://question_service:3002',
     changeOrigin: true,
-    pathRewrite: {'^/': '/questions/'},
+    pathRewrite: {'^/api/questions': '/questions'},
     logger: console,
     on: {
         proxyReq: (proxyReq, req, res) => {
@@ -176,6 +176,6 @@ app.use(express.json());
 // });
 
 
-server.listen(3001);
+server.listen(3000);
 
 

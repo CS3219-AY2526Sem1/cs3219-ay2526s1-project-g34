@@ -3,7 +3,7 @@
     "username": "app",
     "password": "dev",
     "database": "database_development",
-    "host": "localhost",
+    "host": "db",
     "port": 5432,
     "dialect": "postgres"
   },
@@ -11,7 +11,7 @@
     "username": "app_test",
     "password": "test",
     "database": "database_test",
-    "host": "localhost",
+    "host": "db",
     "port": 5432,
     "dialect": "postgres"
   }

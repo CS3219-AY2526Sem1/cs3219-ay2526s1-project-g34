@@ -1,3 +1,17 @@
+# ============================================
+# Database-Only Docker Compose Configuration
+# ============================================
+# This file is for running ONLY the PostgreSQL database.
+# Use this when you want to:
+# - Run backend services locally (npm start) while using containerized database
+# - Debug services without rebuilding containers
+# - Faster startup during development
+#
+# Usage: docker compose -f dev.docker-compose.yml up -d
+#
+# For running the COMPLETE application (recommended), use: docker-compose.yml
+# ============================================
+
 services:
   db:
     image: postgres
