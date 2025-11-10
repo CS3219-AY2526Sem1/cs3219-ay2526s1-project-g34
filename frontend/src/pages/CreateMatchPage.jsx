@@ -3,7 +3,7 @@ import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {io} from 'socket.io-client';
 
-const API = 'http://localhost:3001/api/matching';
+const API = 'http://localhost:3004/matching';
 const POLLING_INTERVAL_MS = 1000;
 
 export const CreateMatchPage = ({user}) => {
@@ -145,7 +145,7 @@ export const CreateMatchPage = ({user}) => {
 
     // Fetch available topics
     useEffect(() => {
-      fetch('http://localhost:3001/api/questions/topics').then(res => res.json()).then(data => {
+      fetch('http://localhost:3002/questions/topics').then(res => res.json()).then(data => {
         const topicList = data.topics || []; 
         setTopics(topicList);
         console.log('questions topics', topicList);

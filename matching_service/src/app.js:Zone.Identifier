@@ -1,0 +1,4 @@
+[ZoneTransfer]
+ZoneId=3
+ReferrerUrl=vscode-file://vscode-app/c:/Users/taop3/AppData/Local/Programs/Microsoft%20VS%20Code/resources/app/out/vs/code/electron-browser/workbench/workbench.html
+HostUrl=file://wsl.localhost/Ubuntu/home/sdf/cs3219-ay2526s1-project-g34/matching_service/src/app.js

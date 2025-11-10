@@ -101,6 +101,26 @@ services:
       - peerprep-network
     restart: unless-stopped
 
+      # Matching Service
+  matching_service:
+    build:
+      context: ./matching_service
+      dockerfile: Dockerfile
+    ports:
+      - "3004:3004"
+    environment:
+      - NODE_ENV=development
+      - PORT=3004
+      - QUESTION_SERVICE_URL=http://question_service:3002
+      - COLLABORATION_SERVICE_URL=http://collaboration_service:3003
+    # Add DB_* variables here if matching_service needs database access
+    depends_on:
+      - db   # only if it uses the database
+    networks:
+      - peerprep-network
+    restart: unless-stopped
+
+
   # Gateway Service
   gateway:
     build:
@@ -113,6 +133,7 @@ services:
       - USER_SERVICE_URL=http://user_service:3001
       - QUESTION_SERVICE_URL=http://question_service:3002
       - COLLABORATION_SERVICE_URL=http://collaboration_service:3003
+      - MATCHING_SERVICE_URL=http://matching_service:3004
     depends_on:
       - user_service
       - question_service
