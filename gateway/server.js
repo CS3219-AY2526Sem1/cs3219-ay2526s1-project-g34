@@ -6,10 +6,6 @@ var app = express()
 const http = require('http')
 const server = http.createServer(app);
 
-// ... (existing imports and app setup)
-
-app.use(morgan('dev'));  // Basic logging (already present)
-
 // Custom middleware for detailed incoming request logging (place before proxies)
 app.use((req, res, next) => {
     console.log('📥 Incoming Request from Client:');
@@ -17,7 +13,7 @@ app.use((req, res, next) => {
     console.log(`  - URL: ${req.url}`);
     console.log(`  - Headers: ${JSON.stringify(req.headers, null, 2)}`);
     console.log(`  - Query: ${JSON.stringify(req.query, null, 2)}`);
-    if (req.body) {
+    if (req.headers['content-type'] && req.headers['content-type'].includes('application/json') && req.body) {
         console.log(`  - Body: ${JSON.stringify(req.body, null, 2)}`);
     }
     next();
@@ -25,13 +21,15 @@ app.use((req, res, next) => {
 
 
 app.use(cors({
-    origin: 'http://localhost:5173',
+    origin: ['http://localhost', 'http://localhost:80', 'http://localhost:5173'],
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
     allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true,
     exposedHeaders: ['Set-Cookie'],
     allowCredentials: true
 }))
+
+app.use(morgan('dev'));  // Basic logging (already present)
 
 const ioProxy = createProxyMiddleware({
     target: 'http://collaboration_service:3003',
@@ -90,31 +88,28 @@ server.on('upgrade', (request, socket, head) => {
 
 
 app.use('/api/users', createProxyMiddleware({
-    target: 'http://user_service:3002',
+    target: 'http://user_service:3001/users',
     changeOrigin: true,
-    pathRewrite: { '^/api/users': '/users' },
     logger: console,
 }))
 
 app.use('/api/auth', createProxyMiddleware({
-    target: 'http://user_service:3002',
+    target: 'http://user_service:3001/auth',
     changeOrigin: true,
-    pathRewrite: { '^/api/auth': '/auth' },
-    logger: console,
+    logLevel: 'debug',
     on: {
         proxyReq: (proxyReq, req, res) => {
-            console.log(req.originalUrl);
-            console.log(req.path);
-            console.log(proxyReq.path);
-            console.log(req.body)
+            console.log('Original URL:', req.originalUrl);
+            console.log('Proxy Path:', proxyReq.path); // Should be /auth/login
+            console.log('Body:', req.body);
+            console.log('updated here')
         }
     }
-}))
+}));
 
 app.use('/api/matches', createProxyMiddleware({
-    target: 'http://collaboration_service:3003',
+    target: 'http://collaboration_service:3003/matches',
     changeOrigin: true,
-    pathRewrite: {'^/api/matches': '/matches'},
     logger: console,
     on: {
         proxyReq: (proxyReq, req, res) => {
@@ -127,9 +122,8 @@ app.use('/api/matches', createProxyMiddleware({
 }))
 
 app.use('/api/questions', createProxyMiddleware({
-    target: 'http://question_service:3002',
+    target: 'http://question_service:3002/questions',
     changeOrigin: true,
-    pathRewrite: {'^/api/questions': '/questions'},
     logger: console,
     on: {
         proxyReq: (proxyReq, req, res) => {
@@ -142,9 +136,8 @@ app.use('/api/questions', createProxyMiddleware({
 }))
 
 app.use('/api/matching', createProxyMiddleware({
-    target: 'http://localhost:3005',
+    target: 'http://matching_service:3004/matching',
     changeOrigin: true,
-    pathRewrite: {'^/': '/matching/'},
     logger: console,
     on: {
         proxyReq: (proxyReq, req, res) => {
@@ -156,7 +149,8 @@ app.use('/api/matching', createProxyMiddleware({
     }
 }))
 
-app.use(express.json());
+// Use express.json() for /api routes BEFORE proxy
+app.use('/api', express.json());
 
 // WebSocket proxy for Socket.IO
 

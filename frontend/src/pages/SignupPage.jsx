@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+const gatewayUrl = 'http://localhost:3000/api'; 
 
 export const SignupPage = ({ setUser }) => {
     const [data, setData] = useState({ username: '', password: '', role: 'user' });
@@ -20,7 +21,7 @@ export const SignupPage = ({ setUser }) => {
         }
 
         try {
-            const response = await fetch('http://localhost:3001/users', {
+            const response = await fetch(`${gatewayUrl}/users`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(data)

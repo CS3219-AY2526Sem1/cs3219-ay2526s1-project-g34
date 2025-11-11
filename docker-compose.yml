@@ -11,13 +11,14 @@
 # - User Service - http://localhost:3001
 # - Question Service - http://localhost:3002
 # - Collaboration Service - http://localhost:3003
+# - Matching Service - http://localhost:3004
 # - Gateway - http://localhost:3000
 # - PostgreSQL Database - localhost:5432
 #
 # For database-only setup, see: dev.docker-compose.yml
 # ============================================
 
-version: '3.8'
+# version: '3.8'
 
 services:
   # Database
@@ -48,7 +49,7 @@ services:
       context: ./user_service
       dockerfile: Dockerfile
     ports:
-      - "3001:3002"
+      - "3001:3001"
     environment:
       - NODE_ENV=development
       - DB_HOST=db
@@ -56,7 +57,7 @@ services:
       - DB_NAME=database_development
       - DB_USER=app
       - DB_PASSWORD=dev
-      - PORT=3002
+      - PORT=3001
       - JWT_PRIVATE_KEY_PATH=./src/keys/jwt-private.pem
       - JWT_PUBLIC_KEY_PATH=./src/keys/jwt-public.pem
     depends_on:

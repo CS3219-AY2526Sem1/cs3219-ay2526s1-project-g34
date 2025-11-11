@@ -21,6 +21,6 @@ app.use(express.json());
 // routes
 app.use('/status', helloRoutes);
 app.use('/users', userRoutes);
-app.use('/auth', authRoutes)
+app.use('/auth', authRoutes);
 
 module.exports = app;

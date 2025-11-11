@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { io } from 'socket.io-client';
 import { useParams, Link, Navigate, useNavigate, useLocation } from 'react-router-dom'
+const gatewayUrl = 'http://localhost:3000';
 
 export const MatchRoom = (user) => {
 
@@ -24,7 +25,7 @@ export const MatchRoom = (user) => {
 
   useEffect(() => {
     console.log('Initializing Socket.IO connection to collaboration service')
-    const newSocket = io('http://localhost:3003', {
+    const newSocket = io(`${gatewayUrl}`, {
         transports: ['polling', 'websocket'],
         reconnection: true,
         reconnectionAttempts: 5,
