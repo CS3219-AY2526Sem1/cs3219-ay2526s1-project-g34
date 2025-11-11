@@ -172,36 +172,131 @@ export const CreateMatchPage = ({user}) => {
       });
     };
   
+    // --- UI improvements: inline styles + spinner keyframes (no logic changes) ---
+    const styles = {
+      container: {
+        display: 'flex',
+        justifyContent: 'center',
+        padding: 24,
+        fontFamily: '"Segoe UI", Roboto, Helvetica, Arial, sans-serif',
+      },
+      card: {
+        width: '100%',
+        maxWidth: 560,
+        background: '#ffffff',
+        borderRadius: 10,
+        boxShadow: '0 8px 30px rgba(15, 23, 42, 0.06)',
+        padding: 20,
+        boxSizing: 'border-box',
+      },
+      title: { margin: 0, fontSize: 20, color: '#0f172a' },
+      desc: { marginTop: 6, marginBottom: 14, color: '#475569', fontSize: 13 },
+      field: { marginBottom: 12, display: 'flex', flexDirection: 'column', gap: 6 },
+      label: { fontSize: 13, color: '#0f172a', fontWeight: 600 },
+      select: { padding: '10px 12px', borderRadius: 8, border: '1px solid #e6eef8', fontSize: 14 },
+      actions: { display: 'flex', gap: 10, marginTop: 8 },
+      primary: disabled => ({
+        flex: 1,
+        padding: '10px 12px',
+        borderRadius: 8,
+        border: 'none',
+        background: disabled ? '#94a3b8' : '#2563eb',
+        color: '#fff',
+        cursor: disabled ? 'not-allowed' : 'pointer',
+        fontWeight: 700,
+      }),
+      secondary: {
+        padding: '10px 12px',
+        borderRadius: 8,
+        border: '1px solid #e6eef8',
+        background: '#fff',
+        cursor: 'pointer',
+        color: '#0f172a',
+        fontWeight: 700,
+      },
+      meta: { marginTop: 10, color: '#64748b', fontSize: 12 },
+      spinner: {
+        width: 16,
+        height: 16,
+        borderRadius: '50%',
+        border: '3px solid rgba(255,255,255,0.3)',
+        borderTopColor: '#fff',
+        display: 'inline-block',
+        verticalAlign: 'middle',
+        marginRight: 8,
+        animation: 'cm-spin 1s linear infinite',
+      },
+    };
+
+    // inject keyframes once
+    useEffect(() => {
+      const id = 'cm-spinner-style';
+      if (document.getElementById(id)) return;
+      const s = document.createElement('style');
+      s.id = id;
+      s.innerHTML = `@keyframes cm-spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }`;
+      document.head.appendChild(s);
+    }, []);
+
     return (
-    
-    
-      <form onSubmit={handleSubmit}>
-        <h2>Create a New Match</h2>
-        <label>
-          Difficulty:
-          <select value={difficulty} disabled={isFinding} onChange={e => setDifficulty(e.target.value)}>
-            <option value='easy'>Easy</option>
-            <option value='medium'>Medium</option>
-            <option value='hard'>Hard</option>
-          </select>
-        </label>
+      <div style={styles.container}>
+        <div style={styles.card}>
+          <h2 style={styles.title}>Find a Coding Partner</h2>
+          <div style={styles.desc}>Select a difficulty and an optional topic. We'll try to match you quickly — you can cancel anytime.</div>
 
-        <select value={selectedTopic} disabled={isFinding} onChange={e => setSelectedTopic(e.target.value)} >
-          <option value="" ></option>
-          {topics.map((topic, index) => (
-            <option key={index} value={topic} >{topic}</option>
-          ))}
-        </select>
-        
-        <button type="submit"  disabled={isFinding}>
-          {isFinding ? "Finding a match..." : "Find match" }
-        </button>
+          <form onSubmit={handleSubmit}>
+            <div style={styles.field}>
+              <label style={styles.label} htmlFor="difficulty">Difficulty</label>
+              <select
+                id="difficulty"
+                value={difficulty}
+                disabled={isFinding}
+                onChange={e => setDifficulty(e.target.value)}
+                style={styles.select}
+              >
+                <option value='easy'>Easy</option>
+                <option value='medium'>Medium</option>
+                <option value='hard'>Hard</option>
+              </select>
+            </div>
 
-        <button type="button" disabled={!isFinding} onClick={() => { handleCancelFindMatch();}}>
-          Cancel
-        </button>
-      </form>
-      
+            <div style={styles.field}>
+              <label style={styles.label} htmlFor="topic">Topic (optional)</label>
+              <select
+                id="topic"
+                value={selectedTopic}
+                disabled={isFinding}
+                onChange={e => setSelectedTopic(e.target.value)}
+                style={styles.select}
+              >
+                <option value="">Any topic</option>
+                {topics.map((topic, index) => (
+                  <option key={index} value={topic}>{topic}</option>
+                ))}
+              </select>
+            </div>
+
+            <div style={styles.actions}>
+              <button type="submit" disabled={isFinding} style={styles.primary(isFinding)}>
+                {isFinding ? (<><span style={styles.spinner} />Finding a match...</>) : 'Find match'}
+              </button>
+
+              <button
+                type="button"
+                disabled={!isFinding}
+                onClick={handleCancelFindMatch}
+                style={styles.secondary}
+              >
+                Cancel
+              </button>
+            </div>
+
+            <div style={styles.meta}>
+              {isFinding ? 'Searching — we will notify you when a partner is found.' : 'Matches usually appear within a minute.'}
+            </div>
+          </form>
+        </div>
+      </div>
     );
   }
 
