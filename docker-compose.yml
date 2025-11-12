@@ -1,3 +1,14 @@
+# AI Assistance Disclosure:
+# Tool: GitHub Copilot (Claude Sonnet 4.5)
+# Date: 2025-11-07
+# Scope: Assisted in generating boilerplate `docker-compose.yml` configuration for the complete 
+# PeerPrep application stack. Generated for frontend, gateway, user, question, and collaboration microservices, 
+# along with PostgreSQL database setup,shared network, and persistent volumes. Generate comments for the complete stack.
+# System architecture, service boundaries, and design decisions were independently determined by the team prior to AI assistance.
+# Author review: I validated port mappings, dependency ordering, and environment consistency 
+# across all services. Adjusted some comments for clarity and ensured alignment with development 
+# and production deployment best practices.
+
 # ============================================
 # PeerPrep - Complete Application Stack
 # ============================================

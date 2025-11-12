@@ -1,3 +1,15 @@
+// AI Assistance Disclosure:
+// Tool: GitHub Copilot (Claude Sonnet 4.5)
+// Date: 2025-11-07
+// Scope: Assisted in expanding and refining the `QuestionManagerPage` React component, including 
+// CRUD operations for managing coding questions (create, fetch, edit, delete). Suggested migration 
+// of API endpoints from port 3001 to 3002, integration of dynamic form validation, modal-based 
+// editing UI, and improved visual layout for the question bank. Contributed inline style definitions 
+// for responsive design, consistent typography, and semantic color schemes for difficulty levels.
+// Author review: I verified API request logic and error handling, enhanced UX with real-time state 
+// updates and modals, adjusted component hierarchy for maintainability, and ensured accessibility 
+// and stylistic coherence with the overall PeerPrep interface.
+
 import React, { useState,useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 const gatewayUrl = 'http://localhost:3000/api';

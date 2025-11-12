@@ -1,3 +1,13 @@
+// AI Assistance Disclosure:
+// Tool: GitHub Copilot (Claude Sonnet 4.5)
+// Date: 2025-11-07
+// Scope: Assisted in enhancing the Sequelize initialization logic to include fallback support 
+// for environment variables and configuration defaults. 
+// Author review: I verified database connection parameters, ensured backward compatibility 
+// with existing configuration files, and confirmed that the logic adheres to security and 
+// deployment best practices. Architectural design and environment configuration decisions 
+// were independently determined by the team prior to AI assistance.
+
 'use strict';
 
 const fs = require('fs');

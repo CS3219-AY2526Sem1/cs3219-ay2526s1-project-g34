@@ -1,3 +1,16 @@
+// AI Assistance Disclosure:
+// Tool: GitHub Copilot (Claude Sonnet 4.5)
+// Date: 2025-11-07
+// Scope: Assisted in creating and refining the `SignupPage` React component, including form 
+// validation, password confirmation logic, role toggle functionality (user/admin), and navigation 
+// flow after successful registration. Suggested implementation of async/await with error handling 
+// for API calls, JWT token storage in localStorage, and responsive inline styling for form fields 
+// and buttons. Added UI enhancements such as role-based color toggling, dynamic loading states, 
+// and inline error display for improved UX.
+// Author review: I validated registration logic and API integration, improved input accessibility, 
+// refined visual consistency with the login flow, and ensured secure form handling practices in 
+// alignment with the PeerPrep application’s design and architecture.
+
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 const gatewayUrl = 'http://localhost:3000/api'; 

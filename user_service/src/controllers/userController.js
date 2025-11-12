@@ -1,3 +1,15 @@
+// AI Assistance Disclosure:
+// Tool: GitHub Copilot (Claude Sonnet 4.5)
+// Date: 2025-11-07
+// Scope: Assisted in drafting boilerplate for an Express.js user controller function 
+// (`createUser`) handling input validation, duplicate username checks, and structured 
+// error handling with Sequelize ORM. Suggested consistent response formatting and 
+// logging statements for debugging.
+// Author review: I verified all validation logic, database queries, and error responses 
+// to ensure correctness and adherence to application requirements. Controller logic, 
+// route structure, and database schema design were independently determined by the team 
+// prior to AI assistance.
+
 const { User } = require('../models/index.js');
 const { authService } = require('../service/authService.js');
 
