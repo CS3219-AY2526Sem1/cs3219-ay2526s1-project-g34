@@ -1,3 +1,15 @@
+/*
+ * AI Assistance Disclosure:
+ * Tool: GitHub Copilot (Claude Sonnet 4.5)
+ * Date: 2025-11-12
+ * Scope: Drafted the CodeEditor usage guide and examples, including basic and Socket.IO
+ * integration snippets, supported languages list, prop JSDoc, styling customization notes,
+ * performance considerations, troubleshooting tips, and backend event mapping for
+ * 'code-update' / 'language-update' and corresponding server emits.
+ * Author review: I verified example correctness, aligned event names with the collaboration
+ * service, clarified comments, and tested the snippets for consistency with the CodeEditor API.
+ */
+
 /**
  * Enhanced Code Editor Component Usage Guide
  * ===========================================
@@ -141,13 +153,13 @@ const SUPPORTED_LANGUAGES = [
 
 // FEATURES INCLUDED
 /**
- * ✅ Syntax highlighting with color-coded keywords, variables, comments
- * ✅ Line numbers for easy navigation
- * ✅ Tab key support (adds 2 spaces)
- * ✅ Synchronized scrolling
- * ✅ Transparent overlay for seamless editing
- * ✅ Professional monospace font
- * ✅ Responsive design
+ *  Syntax highlighting with color-coded keywords, variables, comments
+ *  Line numbers for easy navigation
+ *  Tab key support (adds 2 spaces)
+ *  Synchronized scrolling
+ *  Transparent overlay for seamless editing
+ *  Professional monospace font
+ *  Responsive design
  */
 
 // STYLING CUSTOMIZATION

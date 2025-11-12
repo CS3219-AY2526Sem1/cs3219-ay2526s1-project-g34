@@ -1,3 +1,27 @@
+/*
+ * AI Assistance Disclosure:
+ * Tool: GitHub Copilot (Claude Sonnet 4.5)
+ * Date: 2025-11-12
+ * Scope: Assisted in extending the `MatchRoom` component to support real-time language 
+ * synchronization via Socket.IO. Generated boilerplate for handling 'language-update' 
+ * emissions and listeners, integrated a language dropdown selector. 
+ * Also proposed CodeEditor integration and display of the selected language in session info.
+ * Author review: I validated socket event logic, refined layout consistency with existing UI, 
+ * and confirmed two-way sync behavior for both code and language updates.
+ */
+
+// AI Assistance Disclosure:
+// Tool: GitHub Copilot (Claude Sonnet 4.5)
+// Date: 2025-11-07
+// Scope: Assisted in enhancing the `MatchRoom` component with real-time Socket.IO connection 
+// logic, improved reconnection handling, and dynamic UI updates for connection status. Suggested 
+// refactoring of socket initialization parameters, event listeners, and reconnection options for 
+// reliability. Contributed to the development of a modern, structured layout including header, 
+// editor, and sidebar sections with responsive inline styles and live session statistics.
+// Author review: I validated socket connection flow and reconnection logic, refined editor 
+// usability features (live line and character counts), optimized layout styling for clarity and 
+// responsiveness, and confirmed alignment with existing project design and collaboration patterns.
+
 import React, { useState, useEffect, useRef } from 'react';
 import { io } from 'socket.io-client';
 import { useParams, Link, Navigate, useNavigate, useLocation } from 'react-router-dom'

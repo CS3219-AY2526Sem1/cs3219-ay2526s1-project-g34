@@ -1,3 +1,15 @@
+// AI Assistance Disclosure:
+// Tool: GitHub Copilot (Claude Sonnet 4.5)
+// Date: 2025-11-07
+// Scope: Assisted in building and refining the `MatchesPage` React component with asynchronous 
+// data fetching logic, dynamic rendering of matches, and conditional UI for loading and error states. 
+// Suggested integration of enhanced table layout, participant listing, and empty state feedback. 
+// Contributed inline styling for responsiveness, accessibility, and improved readability of match 
+// information (ID, status, participants, actions).
+// Author review: I validated API fetch logic, refined error handling for both user and collaboration 
+// services, optimized layout consistency with modern UI patterns, and verified visual hierarchy 
+// alignment with the overall PeerPrep interface design.
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 const gatewayUrl = 'http://localhost:3000/api';

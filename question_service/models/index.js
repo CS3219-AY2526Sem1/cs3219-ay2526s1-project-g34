@@ -1,3 +1,14 @@
+// AI Assistance Disclosure:
+// Tool: GitHub Copilot (Claude Sonnet 4.5)
+// Date: 2025-11-07
+// Scope: Assisted in refactoring Sequelize database initialization logic to support both 
+// environment variable–based configuration and fallback to default config values. 
+// Suggested use of a `dbConfig` object to improve code clarity.
+// Author review: I verified environment variable mapping, connection parameters, and 
+// fallback behavior to ensure reliability across development and production environments. 
+// All architectural and configuration design decisions were independently determined by the team 
+// prior to AI assistance.
+
 // AI Assistance Disclosure
 // Tool: ChatGPT (GPT-5 Thinking), date: 2025-11-13
 // Scope: Reviewed and refined database initialization script for Sequelize setup,

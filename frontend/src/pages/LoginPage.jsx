@@ -1,3 +1,15 @@
+// AI Assistance Disclosure:
+// Tool: GitHub Copilot (Claude Sonnet 4.5)
+// Date: 2025-11-07
+// Scope: Assisted in implementing the `LoginPage` React component with form state management, 
+// authentication handling, and navigation flow. Suggested structured error and loading state 
+// logic, secure credential handling via POST request, and integration with localStorage for JWT 
+// token persistence. Also provided styled UI layout for login and signup navigation using inline 
+// design system.
+// Author review: I validated authentication request flow, improved error message clarity, refined 
+// form accessibility (labels and placeholders), and verified navigation transitions between login 
+// and signup pages.
+
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 const gatewayUrl = 'http://localhost:3000/api'; 

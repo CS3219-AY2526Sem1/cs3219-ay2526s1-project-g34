@@ -366,6 +366,97 @@ SELECT * FROM "Questions";
 ### Collaboration Service (port 3003)
 - WebSocket connection for real-time collaboration
 - Events: `join-match`, `code-update`, `end-match`
+# AI Usage Disclosure 
+
+## Overview
+This segment provides complete transparency regarding AI assistance used in this project's development.
+---
+
+## AI Tools Used
+
+**Primary Tool:** GitHub Copilot Chat
+- **Model:** Claude Sonnet 4.5 
+- **Usage Date:** 7, 12 November 2024 
+- **Purpose:** Code generation, debugging, refactoring, documentation
+
+---
+
+## Prohibited Phases (NOT Used)
+
+AI was explicitly **NOT** used for:
+- Requirements elicitation
+- System architecture design decisions
+- Project features ideas and functionalities
+- High-level design choices
+- Security policy decisions
+- Deployment strategy planning
+
+These critical decisions were made entirely by the development team.
+
+---
+
+## Allowed Uses (Where AI Was Applied)
+
+### 1. Feature Implementation 
+**Task:** Enhanced Code Editor with Syntax Highlighting
+- **AI Contribution:** 
+  - Generated CodeEditor component with react-syntax-highlighter
+  - Created language selection UI
+  - Implemented Socket.IO integration for language sync
+- **Developer Actions:**
+  - Reviewed all generated code for correctness
+  - Tested with 14+ programming languages
+  - Verified backward compatibility
+  - Validated performance with large files
+- **Files:** 
+  - `frontend/src/components/CodeEditor.jsx`
+  - `frontend/package.json`, `frontend/src/pages/MatchRoom.jsx`, `collaboration_service/server.js`
+
+### 2. UI Refinement 
+**Task:** Simplify status display messages
+- **AI Contribution:** Made precise text changes per specifications
+- **Developer Actions:** Visual verification and approval
+- **Files:** `frontend/src/pages/MatchRoom.jsx`
+
+---
+
+## Verification Process
+
+### All AI-Generated Code Was:
+1. **Reviewed** - Line-by-line code review by developers
+2. **Understood** - Developers comprehended all logic and patterns
+3. **Tested** - Comprehensive manual and integration testing
+4. **Modified** - Adjusted where necessary for project requirements
+
+### Testing Performed:
+- **Functional Testing:** All features tested with real user scenarios
+- **Integration Testing:** Socket.IO events between frontend and backend
+- **Edge Case Testing:** Network failures, reconnections, concurrent edits
+- **Cross-Browser Testing:** Chrome, Firefox, Safari
+- **Performance Testing:** Large code files (1000+ lines), multiple users
+- **Security Review:** Validated all changes don't introduce vulnerabilities
+
+
+
+## Developer Contributions
+
+### Beyond AI Assistance:
+1. **Requirement Definition** - All feature requirements defined by team
+2. **Architecture Understanding** - Deep understanding of microservices setup
+3. **Security Decisions** - Made informed choices about SSL bypass for dev environment
+4. **Testing Strategy** - Designed comprehensive test scenarios
+5. **Code Review** - Reviewed every AI suggestion critically
+6. **UI/UX Decisions** - Final approval on visual design
+7. **Integration** - Ensured AI-generated code worked with existing system
+8. **Quality Assurance** - Validated correctness, performance, and security
+
+## Detailed Prompt Log
+
+See `/ai/usage-log.md` for:
+- Exact prompts given to AI
+- AI responses and suggestions
+- Actions taken (accepted/modified/rejected)
+- Developer notes on each interaction
 
 ## 🤝 Contributing
 

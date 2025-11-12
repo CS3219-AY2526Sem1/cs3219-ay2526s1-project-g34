@@ -1,3 +1,11 @@
+// AI Assistance Disclosure:
+// Tool: GitHub Copilot (Claude Sonnet 4.5)
+// Date: 2025-11-07
+// Scope: Assisted in developing the `CreateMatchPage` React component, including form submission 
+// logic with async/await, error handling, and navigation using React Router. 
+// Author review: I validated API endpoints and error flow, refined UI alignment and button styling, 
+// and tested navigation behavior for match creation scenarios.
+
 import React, { useState, useRef } from 'react';
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';

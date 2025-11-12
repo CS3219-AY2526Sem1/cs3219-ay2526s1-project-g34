@@ -1,3 +1,11 @@
+// AI Assistance Disclosure:
+// Tool: GitHub Copilot (Claude Sonnet 4.5)
+// Date: 2025-11-07
+// Scope: Assisted in enhancing the `LayoutComponent` React layout with dynamic navigation styling,
+// active route highlighting using `useLocation`, and improved UI/UX structure. 
+// Author review: I verified route path checks, refined conditional rendering logic, optimized
+// inline style organization, and ensured component compatibility with React.
+
 import React from "react";
 import { Outlet, Link, useLocation } from "react-router-dom";
 

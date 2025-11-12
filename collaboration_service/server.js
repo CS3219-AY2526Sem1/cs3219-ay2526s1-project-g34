@@ -1,3 +1,11 @@
+/*
+ * AI Assistance Disclosure:
+ * Tool: GitHub Copilot (Claude Sonnet 4.5)
+ * Date: 2025-11-12
+ * Scope: Suggested the implementation of real-time language synchronization (`language-update` socket event) 
+ * and refactored `code-updated` broadcast to exclude sender. Also proposed adding default language state to match creation.
+ * Author review: I verified event emission logic, adjusted socket scopes, and ensured compatibility with existing match state structure.
+ */
 const express = require('express');
 const morgan = require('morgan');
 const cors = require('cors');

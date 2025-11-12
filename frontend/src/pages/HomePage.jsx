@@ -1,3 +1,14 @@
+// AI Assistance Disclosure:
+// Tool: GitHub Copilot (Claude Sonnet 4.5)
+// Date: 2025-11-12
+// Scope: Assisted in creating the `HomePage` React component, including the personalized welcome
+// layout, dynamic rendering of user information (username, role, ID), and styled UI cards for 
+// quick stats. Suggested structured content sections (header, statsGrid, and welcomeText) with 
+// consistent inline styling for responsiveness and readability.
+// Author review: I refined layout hierarchy, ensured accurate prop usage for `user`, optimized 
+// visual spacing and accessibility contrast, and verified alignment with the application's 
+// design language.
+
 export const HomePage = (user) => {
     return (
         <div style={styles.container}>

@@ -1,3 +1,14 @@
+# AI Assistance Disclosure:
+# Tool: GitHub Copilot (Claude Sonnet 4.5)
+# Date: 2025-11-07
+# Scope: Assisted in generating boilerplate Bash script for PostgreSQL database initialization, 
+# including creation of users, development and test databases, and schema setup for "Users" 
+# and "Questions" tables. Suggested structure for SQL execution blocks and safe error handling 
+# using `set -e` and `ON_ERROR_STOP`.
+# Author review: I validated all SQL commands, ensured schema definitions, indexes, and user 
+# privileges align with project requirements, and verified that system architecture and 
+# database schema design were independently determined by the team prior to AI assistance.
+
 #!/bin/bash
 set -e
 

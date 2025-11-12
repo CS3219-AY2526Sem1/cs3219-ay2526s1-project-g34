@@ -1,3 +1,11 @@
+/*
+ * AI Assistance Disclosure:
+ * Tool: GitHub Copilot (Claude Sonnet 4.5)
+ * Date: 2025-11-12
+ * Scope: Generated the initial implementation of the `CodeEditor` React component with syntax highlighting, 
+ * including hooks for cursor tracking, scroll synchronization, and tab indentation handling. Suggested multi-language support.
+ * Author review: I refactored component logic, adjusted layout styling, and validated cross-browser textarea behavior.
+ */
 import React, { useState, useRef, useEffect } from 'react';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus, vs } from 'react-syntax-highlighter/dist/esm/styles/prism';
