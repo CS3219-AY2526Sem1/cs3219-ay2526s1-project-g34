@@ -1,0 +1,176 @@
+# AI Assistance Disclosure:
+# Tool: GitHub Copilot (Claude Sonnet 4.5)
+# Date: 2025-11-07
+# Scope: Assisted in generating boilerplate `docker-compose.yml` configuration for the complete 
+# PeerPrep application stack. Generated for frontend, gateway, user, question, and collaboration microservices, 
+# along with PostgreSQL database setup,shared network, and persistent volumes. Generate comments for the complete stack.
+# System architecture, service boundaries, and design decisions were independently determined by the team prior to AI assistance.
+# Author review: I validated port mappings, dependency ordering, and environment consistency 
+# across all services. Adjusted some comments for clarity and ensured alignment with development 
+# and production deployment best practices.
+
+# ============================================
+# PeerPrep - Complete Application Stack
+# ============================================
+# This is the MAIN docker-compose file for running the entire application.
+# It includes all microservices: frontend, backend services, and database.
+#
+# Usage: docker compose up -d
+#
+# Services included:
+# - Frontend (React + Nginx) - http://localhost
+# - User Service - http://localhost:3001
+# - Question Service - http://localhost:3002
+# - Collaboration Service - http://localhost:3003
+# - Matching Service - http://localhost:3004
+# - Gateway - http://localhost:3000
+# - PostgreSQL Database - localhost:5432
+#
+# For database-only setup, see: dev.docker-compose.yml
+# ============================================
+
+# version: '3.8'
+
+services:
+  # Database
+  db:
+    image: postgres:15-alpine
+    ports:
+      - "5432:5432"
+    restart: always
+    shm_size: "128m"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init-database.sh:/docker-entrypoint-initdb.d/init-database.sh
+    networks:
+      - peerprep-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  # User Service
+  user_service:
+    build:
+      context: ./user_service
+      dockerfile: Dockerfile
+    ports:
+      - "3001:3001"
+    environment:
+      - NODE_ENV=development
+      - DB_HOST=db
+      - DB_PORT=5432
+      - DB_NAME=database_development
+      - DB_USER=app
+      - DB_PASSWORD=dev
+      - PORT=3001
+      - JWT_PRIVATE_KEY_PATH=./src/keys/jwt-private.pem
+      - JWT_PUBLIC_KEY_PATH=./src/keys/jwt-public.pem
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - peerprep-network
+    restart: unless-stopped
+
+  # Question Service
+  question_service:
+    build:
+      context: ./question_service
+      dockerfile: Dockerfile
+    ports:
+      - "3002:3002"
+    environment:
+      - NODE_ENV=development
+      - DB_HOST=db
+      - DB_PORT=5432
+      - DB_NAME=database_development
+      - DB_USER=app
+      - DB_PASSWORD=dev
+      - PORT=3002
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - peerprep-network
+    restart: unless-stopped
+
+  # Collaboration Service
+  collaboration_service:
+    build:
+      context: ./collaboration_service
+      dockerfile: Dockerfile
+    ports:
+      - "3003:3003"
+    environment:
+      - NODE_ENV=development
+    networks:
+      - peerprep-network
+    restart: unless-stopped
+
+      # Matching Service
+  matching_service:
+    build:
+      context: ./matching_service
+      dockerfile: Dockerfile
+    ports:
+      - "3004:3004"
+    environment:
+      - NODE_ENV=development
+      - PORT=3004
+      - QUESTION_SERVICE_URL=http://question_service:3002
+      - COLLABORATION_SERVICE_URL=http://collaboration_service:3003
+    # Add DB_* variables here if matching_service needs database access
+    depends_on:
+      - db   # only if it uses the database
+    networks:
+      - peerprep-network
+    restart: unless-stopped
+
+
+  # Gateway Service
+  gateway:
+    build:
+      context: ./gateway
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+      - USER_SERVICE_URL=http://user_service:3001
+      - QUESTION_SERVICE_URL=http://question_service:3002
+      - COLLABORATION_SERVICE_URL=http://collaboration_service:3003
+      - MATCHING_SERVICE_URL=http://matching_service:3004
+    depends_on:
+      - user_service
+      - question_service
+      - collaboration_service
+    networks:
+      - peerprep-network
+    restart: unless-stopped
+
+  # Frontend
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "80:80"
+    depends_on:
+      - gateway
+      - collaboration_service
+    networks:
+      - peerprep-network
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+
+networks:
+  peerprep-network:
+    driver: bridge
