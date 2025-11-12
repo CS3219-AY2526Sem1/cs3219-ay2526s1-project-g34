@@ -10,4 +10,6 @@ router.get('/random', questionController.randomQuestion);
 router.patch('/:id', questionController.updateQuestionById);
 router.delete('/:id', questionController.deleteQuestionById);
 
+router.get('/topics', questionController.getUniqueTopics    );
+
 module.exports = router;

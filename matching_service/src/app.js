@@ -1,9 +1,11 @@
-const express = require('express');
+const express  = require('express');
 const morgan = require('morgan');
-const cors = require('cors');
-const questionRoutes = require('./routes/questionRoute.js');
+const cors = require('cors'); 
+const matchingRoutes = require('./routes/matchingRoutes.js');
 
 const app = express();
+app.use(morgan('dev'))
+app.use(express.json());
 
 // // CORS configuration
 // app.use(cors({
@@ -13,10 +15,8 @@ const app = express();
 //     credentials: true
 // }));
 
-app.use(morgan('dev'))
-app.use(express.json());
-
 // routes
-app.use('/questions', questionRoutes);
-
+app.use('/matching', matchingRoutes);
 module.exports = app;
+
+
