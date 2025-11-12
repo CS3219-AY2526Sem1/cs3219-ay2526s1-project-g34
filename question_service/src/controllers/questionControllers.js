@@ -1,4 +1,12 @@
-// src/controllers/questionControllers.js
+// AI Assistance Disclosure
+// Tool: ChatGPT (GPT-5 Thinking), date: 2025-11-13
+// Scope: Helped refine controller logic for question creation, update, and random selection.
+// Included small refactors such as the normTopics helper, validation for difficulty/topics,
+// and error-handling improvements for 400/404/500 cases.
+// Also used for learning support on JavaScript arrays, Sets, and Sequelize usage patterns.
+// Author review: All AI-generated suggestions were reviewed, edited, and tested by the author(s).
+
+
 const { Question } = require('../../models');
 
 const ALLOWED_DIFFICULTIES = new Set(['easy', 'medium', 'hard']);

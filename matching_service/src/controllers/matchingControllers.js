@@ -1,4 +1,10 @@
-// matchingController.js
+// AI Assistance Disclosure
+// Tool: ChatGPT (GPT-5 Thinking), date: 2025-11-13
+// Scope: Assisted in refactoring matching logic and queue management functions,
+// improving readability, edge-case handling, and timeout cleanup.
+// Also provided learning support on JavaScript Maps, arrays, and async patterns.
+// Author review: All AI suggestions were reviewed, tested, and refined by the author(s).
+
 
 const QUESTION_BASE = process.env.QUESTION_SERVICE_URL || 'http://question_service:3002';
 const COLLAB_BASE   = process.env.COLLABORATION_SERVICE_URL || 'http://collaboration_service:3003';
