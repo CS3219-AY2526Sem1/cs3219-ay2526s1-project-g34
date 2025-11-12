@@ -9,13 +9,13 @@ const { match } = require('assert');
 const app = express();
 const matches = {}
 
-// // CORS configuration
-// app.use(cors({
-//     origin: ['http://localhost', 'http://localhost:80', 'http://localhost:5173'],
-//     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-//     allowedHeaders: ['Content-Type', 'Authorization'],
-//     credentials: true
-// }));
+// CORS configuration
+app.use(cors({
+    origin: ['http://localhost', 'http://localhost:80', 'http://localhost:5173'],
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    credentials: true
+}));
 
 // Apply middleware BEFORE Socket.IO routes
 app.use(morgan('debug'));
@@ -145,9 +145,6 @@ app.get('/matches', (req,res) => {
 })
 
 
-
-
-
 app.post('/matches', (req, res) => {
   const matchId = uuid.v4();
   matches[matchId] = {
@@ -156,8 +153,7 @@ app.post('/matches', (req, res) => {
     participants: [],
     state: {
       code: ''
-    },
-    
+    }
   }
   console.log('match cretaed!')
   console.log(matches)
