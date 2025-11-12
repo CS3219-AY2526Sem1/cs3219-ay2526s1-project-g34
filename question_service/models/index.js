@@ -1,3 +1,9 @@
+// AI Assistance Disclosure
+// Tool: ChatGPT (GPT-5 Thinking), date: 2025-11-13
+// Scope: Reviewed and refined database initialization script for Sequelize setup,
+// improving environment-variable handling and code clarity.
+// Author review: All changes verified to ensure proper DB connection and model loading.
+
 'use strict';
 
 const fs = require('fs');
