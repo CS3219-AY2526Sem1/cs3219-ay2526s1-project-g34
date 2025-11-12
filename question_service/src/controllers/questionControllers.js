@@ -148,24 +148,6 @@ async function randomQuestion(req, res) {
   }
 }
 
-// GET /questions/topics
-async function getUniqueTopics(req, res) {
-  try {
-    const questions = await Question.findAll({
-      attributes: ['topics'],
-    });
-    const topicSet = new Set();
-    questions.forEach(q => {
-      q.topics.forEach(topic => topicSet.add(topic));
-    });
-    console.log('Unique topics:', Array.from(topicSet));
-    return res.json({ topics: Array.from(topicSet) });
-  } catch (e) {
-    console.error('[questions.getUniqueTopics]', e);
-    return res.status(500).json({ error: 'Failed to get unique topics' });
-  } 
-}
-
 module.exports = {
   createQuestion,
   listQuestions,
@@ -173,6 +155,5 @@ module.exports = {
   updateQuestionById,
   deleteQuestionById,
   randomQuestion,
-  getUniqueTopics,
 };
 

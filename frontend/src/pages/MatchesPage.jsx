@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-const gatewayUrl = 'http://localhost:3000/api';
 
 export const MatchesPage = (user) => {
     const [matches, setMatches] = useState([])
@@ -13,7 +12,7 @@ export const MatchesPage = (user) => {
 
     const fetchMatches = async () => {
         try {
-            const response = await fetch(`${gatewayUrl}/matches`)
+            const response = await fetch('http://localhost:3003/matches')
             if (!response.ok) {
                 throw new Error('Failed to get matches')
             }
