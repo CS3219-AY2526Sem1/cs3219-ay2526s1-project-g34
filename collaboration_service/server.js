@@ -111,8 +111,19 @@ io.on('connection', (socket) => {
     console.log('code update emit')
     matches[matchId].state.code = newCode;
     console.log('emit code-updated to ', matchId)
-    io.to(matchId).emit('code-updated', {
+    // Broadcast to all clients in the room EXCEPT the sender
+    socket.to(matchId).emit('code-updated', {
       code: newCode
+    })
+  })
+
+  socket.on('language-update', (matchId, userId, newLanguage) => {
+    if (!matches[matchId]) return
+    console.log('language update emit:', newLanguage)
+    matches[matchId].state.language = newLanguage;
+    // Broadcast to all clients in the room EXCEPT the sender
+    socket.to(matchId).emit('language-updated', {
+      language: newLanguage
     })
   })
 
@@ -155,7 +166,8 @@ app.post('/matches', (req, res) => {
     status: 'waiting',
     participants: [],
     state: {
-      code: ''
+      code: '',
+      language: 'javascript'  // default language
     },
     
   }
