@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { io } from 'socket.io-client';
 import { useParams, Link, Navigate, useNavigate, useLocation } from 'react-router-dom'
+import { CodeEditor } from '../components/CodeEditor';
 const gatewayUrl = 'http://localhost:3000';
 
 export const MatchRoom = (user) => {
@@ -13,6 +14,7 @@ export const MatchRoom = (user) => {
   const [isConnected, setIsConnected] = useState(false);
 
   const [code, setCode] = useState('');
+  const [language, setLanguage] = useState('javascript');
   const [partnerUsername, setPartnerUsername] = useState(null);
   const [isNarrow, setIsNarrow] = useState(false); // responsive flag
   const location = useLocation();
@@ -67,6 +69,7 @@ export const MatchRoom = (user) => {
     newSocket.on('match-joined', (matchData) => {
       console.log('✅ Successfully joined match:', matchData);
       setCode(matchData.state.code || '')
+      setLanguage(matchData.state.language || 'javascript')
     });
 
     newSocket.on('user-joined', (data) => {
@@ -76,6 +79,11 @@ export const MatchRoom = (user) => {
     newSocket.on('code-updated', (data) => {
       setCode(data.code);
       console.log('this is code now', code)
+    })
+
+    newSocket.on('language-updated', (data) => {
+      setLanguage(data.language);
+      console.log('language updated to:', data.language)
     })
 
     newSocket.on('match-ended', (data) => {
@@ -126,6 +134,15 @@ export const MatchRoom = (user) => {
 
     if (socket) {
       socket.emit('code-update', matchId, user.user.id, newCode);
+    }
+  };
+
+  const handleLanguageChange = (e) => {
+    const newLanguage = e.target.value;
+    setLanguage(newLanguage);
+
+    if (socket) {
+      socket.emit('language-update', matchId, user.user.id, newLanguage);
     }
   };
   
@@ -217,21 +234,46 @@ export const MatchRoom = (user) => {
            <div style={styles.editorContainer}>
              <div style={styles.editorHeader}>
                <div style={styles.editorTabs}>
-                 <div style={styles.activeTab}>Editor</div>
+                 <div style={styles.activeTab}>💻 Editor</div>
                </div>
                <div style={styles.editorInfo}>
+                 {/* Language selector */}
+                 <div style={styles.languageSelector}>
+                   <label htmlFor="language-select" style={styles.languageLabel}>Language:</label>
+                   <select 
+                     id="language-select"
+                     value={language} 
+                     onChange={handleLanguageChange}
+                     style={styles.languageSelect}
+                   >
+                     <option value="javascript">JavaScript</option>
+                     <option value="python">Python</option>
+                     <option value="java">Java</option>
+                     <option value="cpp">C++</option>
+                     <option value="c">C</option>
+                     <option value="csharp">C#</option>
+                     <option value="ruby">Ruby</option>
+                     <option value="go">Go</option>
+                     <option value="rust">Rust</option>
+                     <option value="typescript">TypeScript</option>
+                     <option value="swift">Swift</option>
+                     <option value="kotlin">Kotlin</option>
+                     <option value="php">PHP</option>
+                     <option value="sql">SQL</option>
+                   </select>
+                 </div>
                  {/* show short id in UI but full id is still available via copy */}
                 <div style={styles.infoText}>Session: <strong style={{color:'#0f172a'}}>{shortSessionId}</strong></div>
                </div>
              </div>
 
-             <textarea
-              value={code}
-              onChange={handleChange}
-              placeholder={"// Start typing your code here...\n// Changes will be synced in real-time with other participants"}
-              style={styles.editor}
-              spellCheck={false}
-            />
+             <CodeEditor
+               code={code}
+               onChange={handleChange}
+               language={language}
+               placeholder={`// Start typing your ${language} code here...\n// Changes will be synced in real-time with other participants\n// Syntax highlighting is enabled for better code readability`}
+               theme="light"
+             />
 
             <div style={styles.editorFooter}>
               <div style={styles.footerInfo}>
@@ -259,6 +301,12 @@ export const MatchRoom = (user) => {
              <div style={styles.infoRow}>
                <span style={styles.infoLabel}>Your Username</span>
                <span style={styles.infoValue}>{user.user.username}</span>
+             </div>
+             <div style={styles.infoRow}>
+               <span style={styles.infoLabel}>Language</span>
+               <span style={styles.infoValue}>
+                 {language.charAt(0).toUpperCase() + language.slice(1)}
+               </span>
              </div>
              <div style={styles.infoRow}>
                <span style={styles.infoLabel}>Connection</span>
@@ -413,6 +461,29 @@ const styles = {
   editorInfo: {
     display: 'flex',
     gap: '1rem',
+    alignItems: 'center',
+  },
+  languageSelector: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.5rem',
+  },
+  languageLabel: {
+    fontSize: '0.875rem',
+    fontWeight: '500',
+    color: '#475569',
+  },
+  languageSelect: {
+    padding: '0.375rem 0.75rem',
+    borderRadius: '0.375rem',
+    border: '1px solid #cbd5e1',
+    background: 'white',
+    fontSize: '0.875rem',
+    fontWeight: '500',
+    color: '#1e293b',
+    cursor: 'pointer',
+    outline: 'none',
+    transition: 'border-color 0.2s',
   },
   infoText: {
     fontSize: '0.75rem',
