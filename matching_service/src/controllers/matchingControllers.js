@@ -1,146 +1,166 @@
 // matchingController.js
 
-const { get } = require("../routes/matchingRoutes");
 const QUESTION_BASE = process.env.QUESTION_SERVICE_URL || 'http://question_service:3002';
 const COLLAB_BASE   = process.env.COLLABORATION_SERVICE_URL || 'http://collaboration_service:3003';
 
-
-// // --- Replace these with your actual services ---
-// const questionService = require('../services/questionService');
-// const collaborationService = require('../services/collaborationService');
-
 // ---------------- In-memory state ----------------
 /**
- * pools: Map<poolKey, Array<{userId, topic, ts}>>
- * pendingByUser: Map<userId, poolKey>   // where is this user queued?
- * sessionsByUser: Map<userId, { id: sessionId, users: [a,b], questionId, createdAt }>
+ * pools: Map<difficulty, Map<topicKey, Array<{userId, topic, ts}>>>
+ * pendingByUser: Map<userId, { difficulty, topicKey }>
+ * sessionsByUser: Map<userId, { id: sessionId, users: [a,b], question, createdAt }>
  */
 const pools = new Map();
 const pendingByUser = new Map();
 const sessionsByUser = new Map();
 
-const MATCH_TTL_MS = 20_000;        // 60s queue timeout
-const MATCH_CACHE_TTL_MS = 10_000; // 10s session cache
+const MATCH_TTL_MS = 20_000;        // queue timeout
+const MATCH_CACHE_TTL_MS = 5_000;  // session cache timeout
 
-
-const keyOf = ({ difficulty, topic }) =>
-  `${String(difficulty).toLowerCase()}:${String(topic || 'all').toLowerCase()}`;
+const TOPIC_ALL = 'all';
 
 const now = () => Date.now();
 
-function getQueue(key) {
-  if (!pools.has(key)) pools.set(key, []);
-  return pools.get(key);
+// ---------------- Queue helpers ----------------
+function normalizeDifficulty(d) {
+  if (!d) return null;
+  return String(d).toLowerCase();
 }
-
 function normalizeTopic(topic) {
-  return topic ? String(topic).toLowerCase() : null; // null => "all" bucket
+  if (topic == null) return null;              // null/undefined -> any topic
+  const t = String(topic).trim().toLowerCase();
+  if (t === '' || t === 'all') return null;    // empty/'all' -> any topic
+  return t;                                     
 }
 
+
+function getTopicMap(difficulty) {
+  const diff = normalizeDifficulty(difficulty);
+  if (!diff) throw new Error('difficulty required');
+  if (!pools.has(diff)) pools.set(diff, new Map());
+  const topicMap = pools.get(diff);
+  // ensure the "all" queue exists so Case B has a place to enqueue
+  if (!topicMap.has(TOPIC_ALL)) topicMap.set(TOPIC_ALL, []);
+  return topicMap;
+}
+
+function getQueue(difficulty, topicKey) {
+  const topicMap = getTopicMap(difficulty);
+  const k = topicKey || TOPIC_ALL;
+  if (!topicMap.has(k)) topicMap.set(k, []);
+  return topicMap.get(k);
+}
+
+/**
+ * Prune expired entries from the FRONT of a FIFO queue.
+ * Returns how many entries were removed.
+ */
 function dropExpiredFromQueue(q) {
-  const t = now();
-  let i = 0, w = 0;
-  while (i < q.length) {
-    const keep = (t - q[i].ts) <= MATCH_TTL_MS;
-    if (keep) q[w++] = q[i];
-    else pendingByUser.delete(q[i].userId);
-    i++;
-  }
-  q.length = w;
-}
+  if (!q.length) return 0;
 
-function dequeueOldestOtherThan(q, userId) {
-  for (let i = 0; i < q.length; i++) {
-    if (q[i].userId !== userId) {
-      const mate = q[i];
-      q.splice(i, 1);
-      pendingByUser.delete(mate.userId);
-      return mate;
-    }
+  const nowMs = now();
+  const ttl   = MATCH_TTL_MS;
+
+  // find first non-expired entry; everything before it is expired
+  let cut = 0;
+  while (cut < q.length) {
+    const entry = q[cut];
+    if ((nowMs - entry.ts) <= ttl) break;   // first alive
+    pendingByUser.delete(entry.userId);     // clean pointer for expired
+    cut++;
   }
-  return null;
+
+  if (cut > 0) q.splice(0, cut);            // remove the expired prefix
+  return cut;
 }
 
 
 function cleanupExpiredSessions() {
-    const t = now();
-    for (const [userId, session] of sessionsByUser.entries()) {
-        if ((t - session.createdAt) > MATCH_CACHE_TTL_MS) {
-            sessionsByUser.delete(userId);
-        }
+  const t = now();
+  for (const [userId, session] of sessionsByUser.entries()) {
+    if ((t - session.createdAt) > MATCH_CACHE_TTL_MS) {
+      sessionsByUser.delete(userId);
     }
+  }
 }
 
-async function getRandomQuestion(difficulty,  selectedTopic) {
-    let questionUrl = `${QUESTION_BASE}/questions/random`;
-    if (difficulty && selectedTopic) {
-        questionUrl += `?difficulty=${difficulty}&topic=${selectedTopic}`;
-    } else if (difficulty) {
-        questionUrl += `?difficulty=${difficulty}`;
-    } else if (selectedTopic) {
-        questionUrl += `?topic=${selectedTopic}`;
+/**
+ * Given multiple queues, find the single oldest entry (excluding a given userId).
+ * Returns {queue, index, entry} or null
+ */
+function pickOldestAcross(queues, excludeUserId) {
+  let best = null;
+  for (const q of queues) {
+    dropExpiredFromQueue(q);
+    if (q.length === 0) continue;
+    const front = q[0];  // oldest in that queue
+    if (front.userId === excludeUserId) continue;
+    if (!best || front.ts < best.entry.ts) {
+      best = { queue: q, index: 0, entry: front };
     }
-    const questionResponse = await fetch(questionUrl);
-    if (!questionResponse.ok) {
-        // Returns an object containing the error message
-        return { error: 'Failed to fetch question for match; please try again.' }; 
-    }
-    // Returns the question object itself
-    const question = await questionResponse.json(); 
-    return question;
+  }
+  return best;
 }
 
 
-// ---------------- Internal helper ----------------
+/**
+ * Remove an entry from a queue by index and clear its pending pointer.
+ */
+function takeFromQueue(best) {
+  const { queue, index, entry } = best;
+  queue.splice(index, 1);
+  pendingByUser.delete(entry.userId);
+  return entry;
+}
+
+// ---------------- Remote helpers ----------------
+async function getRandomQuestion(difficulty, selectedTopic) {
+  let url = `${QUESTION_BASE}/questions/random`;
+  const params = [];
+  if (difficulty) params.push(`difficulty=${encodeURIComponent(difficulty)}`);
+  if (selectedTopic) params.push(`topic=${encodeURIComponent(selectedTopic)}`);
+  if (params.length) url += `?${params.join('&')}`;
+
+  const questionResponse = await fetch(url);
+  if (!questionResponse.ok) {
+    return { error: 'Failed to fetch question for match; please try again.' };
+  }
+  return questionResponse.json();
+}
+
+async function createCollabSession() {
+  const res = await fetch(`${COLLAB_BASE}/matches`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({})
+  });
+  if (!res.ok) {
+    const body = await res.text().catch(() => '(no body)');
+    throw new Error(`Collab create failed ${res.status}: ${body}`);
+  }
+  return res.json(); // { matchId }
+}
+
+// ---------------- Match finalization ----------------
 async function postMatchSafe(res, a, b, difficulty, selectedTopic) {
   try {
     cleanupExpiredSessions();
-    let questionUrl = `${QUESTION_BASE}/questions/random`;
-    if (difficulty && selectedTopic) {
-        questionUrl += `?difficulty=${difficulty}&topic=${selectedTopic}`;
-    } else if (difficulty) {
-        questionUrl += `?difficulty=${difficulty}`;
-    } else if (selectedTopic) {
-        questionUrl += `?topic=${selectedTopic}`;
-    }
 
+    // Question: prefer the chosen topic if provided, else empty string means "any"
     const topicForQuestion = selectedTopic || '';
-    const questionResponse = await fetch(questionUrl);
-    if (!questionResponse.ok) {
-      // FIX: use questionResponse, not response
-      const body = await questionResponse.text().catch(() => '(no body)');
-      console.error(
-        `Failed to fetch question: status=${questionResponse.status}, url=/questions/random`,
-        body
-      );
+    const question = await getRandomQuestion(difficulty, topicForQuestion);
+    if (question && question.error) {
       return res.status(500).json({ error: 'Failed to fetch question for match; please try again.' });
     }
-    const question = await questionResponse.json();
 
-    const collabRes = await fetch(`${COLLAB_BASE}/matches`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({}) // your collab service ignores body for now
-    });
-    if (!collabRes.ok) {
-      const body = await collabRes.text().catch(() => '(no body)');
-      console.error(
-        `Failed to create collaboration session: status=${collabRes.status}, url=/matches`,
-        body
-      );
-      return res.status(500).json({ error: 'Failed to create collaboration session; please try again.' });
-    }
-    const { matchId } = await collabRes.json();
+    const { matchId } = await createCollabSession();
 
-    // remove from pending if present
     pendingByUser.delete(a);
     pendingByUser.delete(b);
 
-    // cache session so /status can report matched
-   const cached = {
+    const cached = {
       id: matchId,
       users: [a, b],
-      question: question,
+      question,
       createdAt: now(),
     };
     sessionsByUser.set(a, cached);
@@ -150,7 +170,7 @@ async function postMatchSafe(res, a, b, difficulty, selectedTopic) {
       matched: true,
       sessionId: matchId,
       partnerId: b,
-      question: question
+      question
     });
   } catch (e) {
     console.error('postMatch failed:', e);
@@ -165,150 +185,118 @@ async function findMatch(req, res) {
     return res.status(400).json({ error: 'Missing matching criteria.' });
   }
 
-    
-    const questionExists_response  = await getRandomQuestion(difficulty, topic);
-    if (questionExists_response.error) {
-        return res.status(400).json({ error: "No such question exists. please choose other types of question" });
-    }
-  
-    
+  const uid  = String(userId);
+  const diff = normalizeDifficulty(difficulty);
+  const chosenTopic = normalizeTopic(topic); // null means "any topic"
 
-
-  const uid  = String(userId);                  // normalize
-  const diff = String(difficulty).toLowerCase();
-  const t    = normalizeTopic(topic);           // null if “any”
-
-  const strictKey = keyOf({ difficulty: diff, topic: t });      // "<diff>:<topic>" or "<diff>:all" when t==null
-  const flexKey   = keyOf({ difficulty: diff, topic: 'all' });  // always "<diff>:all"
-
-  // Already queued? don't double-enqueue
-  if (pendingByUser.has(uid)) {
-    return res.json({
-      matched: false,
-      message: 'Already queued, waiting for a partner.',
-      pool: pendingByUser.get(uid)
-    });
-  }
-
-  // --- CASE A: topic chosen (no cross-topic fallback) ---
-  if (t !== null) {
-    // 1) strict same-topic
-    {
-      const q = getQueue(strictKey);
-      dropExpiredFromQueue(q);
-      const mate = dequeueOldestOtherThan(q, uid);
-      if (mate) {
-        return postMatchSafe(res, uid, mate.userId, diff, t); // keep requester’s topic
-      }
-    }
-    // 2) any-topic pool: partner is flexible; keep requester’s topic
-    {
-      const q = getQueue(flexKey);
-      dropExpiredFromQueue(q);
-      const mate = dequeueOldestOtherThan(q, uid);
-      if (mate) {
-        return postMatchSafe(res, uid, mate.userId, diff, t);
-      }
-    }
-    // 3) enqueue into strict topic queue
-    const entry = { userId: uid, topic: t, ts: now() };
-    getQueue(strictKey).push(entry);
-    pendingByUser.set(uid, strictKey);
-    return res.json({ matched: false, message: 'Queued, waiting for a partner.', pool: strictKey });
-  }
-
-  // --- CASE B: no topic chosen (flex across topics; OLDEST wins) ---
+  // Quick question-existence probe so we fail fast on impossible filters
   {
-    const prefix = `${diff}:`;
-    let bestMate = null;  // { userId, topic, ts }
-    let bestKey  = null;
-    let bestIdx  = -1;
-
-    // scan all queues for this difficulty (incl. :all and specific topics)
-    for (const [key, q] of pools.entries()) {
-      if (!key.startsWith(prefix)) continue;
-
-      dropExpiredFromQueue(q);
-
-      // find true oldest across all queues, excluding self
-      for (let i = 0; i < q.length; i++) {
-        const entry = q[i];
-        if (entry.userId === uid) continue;
-        if (!bestMate || entry.ts < bestMate.ts) {
-          bestMate = entry;
-          bestKey  = key;
-          bestIdx  = i;
-        }
-      }
-    }
-
-    if (bestMate) {
-      const q = getQueue(bestKey);
-      q.splice(bestIdx, 1);
-      pendingByUser.delete(bestMate.userId);
-
-      const chosenTopic = bestMate.topic || ''; // flex to partner’s topic ('' if both any)
-      return postMatchSafe(res, uid, bestMate.userId, diff, chosenTopic);
+    const probe = await getRandomQuestion(diff, chosenTopic || '');
+    if (probe && probe.error) {
+      return res.status(400).json({ error: 'No such question exists. Please choose other types of question.' });
     }
   }
 
-  // No mate → enqueue into any-topic pool
-  const entry = { userId: uid, topic: null, ts: now() };
-  getQueue(flexKey).push(entry);
-  pendingByUser.set(uid, flexKey);
-  return res.json({ matched: false, message: 'Queued, waiting for a partner.', pool: flexKey });
-}
+  // Prevent double-enqueue
+  if (pendingByUser.has(uid)) {
+    const p = pendingByUser.get(uid);
+    return res.json({ matched: false, message: 'Already queued, waiting for a partner.', pool: `${p.difficulty}:${p.topicKey}` });
+  }
 
+  // Ensure structures exist
+  const topicMap = getTopicMap(diff);
+
+  // ---------- CASE A: topic chosen ----------
+  if (chosenTopic !== null) {
+    const strictQueue = getQueue(diff, chosenTopic);   // selected topic
+    const allQueue    = getQueue(diff, TOPIC_ALL);     // flexible partners
+
+    // Find globally oldest among these two queues (excluding self)
+    const best = pickOldestAcross([strictQueue, allQueue], uid);
+    if (best) {
+      const mate = takeFromQueue(best);
+      // Keep the requester's chosen topic for the question
+      return postMatchSafe(res, uid, mate.userId, diff, chosenTopic);
+    }
+
+    // No partner found → enqueue into the strict topic queue
+    const entry = { userId: uid, topic: chosenTopic, ts: now() };
+    strictQueue.push(entry);
+    pendingByUser.set(uid, { difficulty: diff, topicKey: chosenTopic });
+    return res.json({ matched: false, message: 'Queued, waiting for a partner.', pool: `${diff}:${chosenTopic}` });
+  }
+
+  // ---------- CASE B: no topic chosen (flex across topics; OLDEST wins) ----------
+  {
+    // Gather all queues under this difficulty (every topic incl. "all")
+    const queues = [];
+    for (const [topicKey, q] of topicMap.entries()) {
+      // include every queue: specific topics and "all"
+      queues.push(q);
+    }
+
+    const best = pickOldestAcross(queues, uid);
+    if (best) {
+      const mate = takeFromQueue(best);
+      const pickedTopic = mate.topic || ''; // if mate had no specific topic, means "any"
+      return postMatchSafe(res, uid, mate.userId, diff, pickedTopic);
+    }
+  }
+
+  // No partner anywhere → enqueue into "all" for this difficulty
+  {
+    const allQueue = getQueue(diff, TOPIC_ALL);
+    const entry = { userId: uid, topic: null, ts: now() };
+    allQueue.push(entry);
+    pendingByUser.set(uid, { difficulty: diff, topicKey: TOPIC_ALL });
+    return res.json({ matched: false, message: 'Queued, waiting for a partner.', pool: `${diff}:${TOPIC_ALL}` });
+  }
+}
 
 async function getMatchStatus(req, res) {
   const uid = String(req.query.userId || '');
   if (!uid) return res.status(400).json({ error: 'Missing userId.' });
 
-  // If user is queued, clean expired entries first
-  const key = pendingByUser.get(uid);
-  if (key) dropExpiredFromQueue(getQueue(key));
 
-  // After cleanup: still queued?
   if (pendingByUser.has(uid)) {
     return res.json({ matched: false, status: 'WAITING' });
   }
 
   cleanupExpiredSessions();
 
-  // check on local cache
   const local = sessionsByUser.get(uid);
-  if (local) return res.json({ 
-    matched: true, 
-    sessionId: local.id,
-    partnerId: local.users.find(u => u !== uid),
-    question: local.question});
+  if (local) {
+    return res.json({
+      matched: true,
+      sessionId: local.id,
+      partnerId: local.users.find(u => u !== uid),
+      question: local.question
+    });
+  }
 
-  // Not pending + no session anywhere = expired
   return res.json({ matched: false, status: 'EXPIRED' });
 }
 
-
 async function cancelMatch(req, res) {
-    const { userId } = req.body || {};
-    if (!userId) {
-        return res.status(400).json({ error: 'Missing userId.' });
-    }
-    const uid = String(userId);
+  const { userId } = req.body || {};
+  if (!userId) return res.status(400).json({ error: 'Missing userId.' });
 
-    const key = pendingByUser.get(uid);
-    if (!key) {
-        return res.status(400).json({ error: 'User is not in the matching queue.' });
+  const uid = String(userId);
+  const pending = pendingByUser.get(uid);
+  if (!pending) {
+    return res.status(400).json({ error: 'User is not in the matching queue.' });
+  }
+
+  const q = getQueue(pending.difficulty, pending.topicKey);
+  // Remove user from that queue
+  for (let i = 0; i < q.length; i++) {
+    if (q[i].userId === uid) {
+      q.splice(i, 1);
+      break;
     }
-    const q = getQueue(key);
-    // Remove user from the queue
-    for (let i = 0; i < q.length; i++) {
-        if (q[i].userId === uid) {
-            q.splice(i, 1);
-            break;
-        }
-    }
-    pendingByUser.delete(uid);
-    return res.json({ cancelled: true, message: 'User has been removed from the matching queue.' });
+  }
+  pendingByUser.delete(uid);
+  return res.json({ cancelled: true, message: 'User has been removed from the matching queue.' });
 }
 
-module.exports = { findMatch, getMatchStatus , cancelMatch};
+module.exports = { findMatch, getMatchStatus, cancelMatch };

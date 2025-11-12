@@ -40,7 +40,7 @@ export const LayoutComponent = ({handleLogout, user}) => {
                                 ➕ Create Match
                             </Link>
                         </li>
-                        <li style={styles.navItem}>
+                        {/* <li style={styles.navItem}>
                             <Link 
                                 to="/matches" 
                                 style={{
@@ -50,7 +50,7 @@ export const LayoutComponent = ({handleLogout, user}) => {
                             >
                                 🔍 Find Matches
                             </Link>
-                        </li>
+                        </li> */}
                         {user && user.role === "admin" && (
                             <li style={styles.navItem}>
                                 <Link 
